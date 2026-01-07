@@ -2,8 +2,8 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Absen Pro Ultimate + Features</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Absen Pro Ultimate + Mode Tim & Individu + Sidebar Pegawai Lengkap</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
@@ -13,10 +13,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
-
     <style>
       :root {
-        --primary: #4f46e5; /* Indigo */
+        --primary: #4f46e5;
         --primary-dark: #4338ca;
         --secondary: #64748b;
         --bg-body: #f1f5f9;
@@ -25,9 +24,9 @@
         --danger: #ef4444;
         --success: #22c55e;
         --warning: #f59e0b;
-        --paper-width: 297mm; /* A4 Landscape default, will auto-adjust in print */
+        --paper-width: 297mm;
+        --table-header-bg: transparent;
       }
-
       * {
         box-sizing: border-box;
         outline: none;
@@ -41,8 +40,6 @@
         color: #1e293b;
         overflow: hidden;
       }
-
-      /* --- SIDEBAR --- */
       .sidebar {
         width: 360px;
         background: var(--bg-panel);
@@ -51,7 +48,7 @@
         flex-direction: column;
         z-index: 20;
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
-        transition: transform 0.3s ease;
+        flex-shrink: 0;
       }
       .brand {
         padding: 20px;
@@ -63,8 +60,6 @@
         align-items: center;
         gap: 10px;
       }
-
-      /* Tabs Navigation */
       .tabs {
         display: flex;
         background: #f8fafc;
@@ -87,12 +82,11 @@
       .tab-btn.active {
         background: white;
         color: var(--primary);
-        shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
       .tab-btn:hover:not(.active) {
         background: #e2e8f0;
       }
-
       .sidebar-content {
         flex: 1;
         overflow-y: auto;
@@ -105,8 +99,6 @@
       .tab-panel.active {
         display: block;
       }
-
-      /* Form Elements */
       .form-group {
         margin-bottom: 15px;
       }
@@ -141,7 +133,6 @@
         min-height: 100px;
         font-family: monospace;
       }
-
       .row-inputs {
         display: flex;
         gap: 10px;
@@ -199,15 +190,12 @@
       .btn-warning:hover {
         background: #fde68a;
       }
-
       .btn-small {
         padding: 6px 12px;
         font-size: 0.8rem;
         width: auto;
         display: inline-flex;
       }
-
-      /* --- MAIN PREVIEW --- */
       .main-area {
         flex: 1;
         overflow: auto;
@@ -216,18 +204,17 @@
         justify-content: center;
         align-items: flex-start;
         position: relative;
+        background-color: #cbd5e1;
       }
-
       .paper {
         background: white;
         width: var(--paper-width);
+        min-width: var(--paper-width);
         min-height: 210mm;
         padding: 15mm 10mm;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
         position: relative;
       }
-
-      /* --- TABLE STYLING --- */
       .header-section {
         display: flex;
         align-items: center;
@@ -258,7 +245,6 @@
         font-weight: normal;
         text-transform: uppercase;
       }
-
       table {
         width: 100%;
         border-collapse: collapse;
@@ -273,15 +259,13 @@
         text-align: center;
         vertical-align: middle;
         color: #000;
+        background-color: transparent;
       }
-
-      /* Dynamic Header Color */
       thead th {
-        background-color: var(--table-header-bg, #f1f5f9);
+        background-color: var(--table-header-bg, transparent);
         height: 35px;
         font-weight: bold;
       }
-
       .col-no {
         width: 30px;
       }
@@ -311,8 +295,6 @@
         text-align: right;
         padding-right: 5px;
       }
-
-      /* Cell Interactions */
       .cell-input {
         cursor: pointer;
         font-family: "Courier New", monospace;
@@ -321,21 +303,17 @@
         transition: background 0.1s;
       }
       .cell-input:hover {
-        background-color: #e0e7ff;
+        background-color: #e0e7ff !important;
       }
-
-      /* Status Colors */
       .st-libur {
         background-color: #ffcccc !important;
         color: #990000;
-      } /* Merah Libur */
-      .st-today {
-        background-color: #fef08a;
-      } /* Kuning Hari Ini */
-
-      /* Footer TTD inside Table */
+      }
+      .text-danger {
+        color: #ef4444;
+      }
       .signature-row td {
-        border: none !important; /* Hilangkan garis untuk baris TTD */
+        border: none !important;
         padding-top: 30px;
         background-color: white !important;
       }
@@ -348,13 +326,11 @@
       .ttd-block {
         text-align: center;
         min-width: 220px;
-        break-inside: avoid; /* Mencegah blok TTD terpotong */
+        break-inside: avoid;
       }
       .ttd-space {
         height: 80px;
       }
-
-      /* --- MODAL STATS --- */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -412,8 +388,6 @@
         cursor: pointer;
         color: #64748b;
       }
-
-      /* Responsive */
       @media (max-width: 1024px) {
         body {
           flex-direction: column;
@@ -422,21 +396,50 @@
         }
         .sidebar {
           width: 100%;
+          height: auto;
+          max-height: 40vh;
           border-right: none;
           border-bottom: 1px solid var(--border);
+          overflow-y: auto;
+        }
+        .main-area {
+          padding: 20px 10px;
+          background: #cbd5e1;
+          display: block;
+          width: 100%;
+          overflow: auto;
+        }
+        .paper {
+          margin: 0 auto;
+          width: 297mm;
+          min-width: 297mm;
+          transform: none;
+          transform-origin: unset;
+          margin-bottom: 20px;
+        }
+      }
+      @media (max-width: 600px) {
+        .brand {
+          padding: 15px;
+          font-size: 1.1rem;
         }
         .main-area {
           padding: 10px;
-          background: #cbd5e1;
         }
-        .paper {
-          transform: scale(0.7);
-          transform-origin: top left;
-          margin-bottom: -30%;
+        .header-text h1 {
+          font-size: 14pt;
+        }
+        .header-text h3 {
+          font-size: 10pt;
+        }
+        .logo-img {
+          height: 60px;
+          width: 60px;
+        }
+        .sidebar {
+          max-height: 35vh;
         }
       }
-
-      /* PRINT SETTINGS */
       @media print {
         body {
           background: white;
@@ -448,7 +451,6 @@
         .modal-overlay {
           display: none !important;
         }
-
         .main-area {
           padding: 0;
           margin: 0;
@@ -467,12 +469,9 @@
           border: none;
           transform: none !important;
         }
-
-        /* Trik agar baris terakhir dan TTD nempel */
         tr {
           page-break-inside: avoid;
         }
-
         @page {
           size: landscape;
           margin: 5mm;
@@ -482,7 +481,6 @@
           print-color-adjust: exact !important;
         }
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -500,15 +498,26 @@
       <div class="brand">
         <i class="fa-solid fa-calendar-check"></i> AbsenPro Ultimate
       </div>
-
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-umum')">
+        <button
+          id="btn-tab-umum"
+          class="tab-btn active"
+          onclick="App.switchTab('tab-umum')"
+        >
           Umum
         </button>
-        <button class="tab-btn" onclick="switchTab('tab-pegawai')">
+        <button
+          id="btn-tab-pegawai"
+          class="tab-btn"
+          onclick="App.switchTab('tab-pegawai')"
+        >
           Pegawai
         </button>
-        <button class="tab-btn" onclick="switchTab('tab-ttd')">
+        <button
+          id="btn-tab-ttd"
+          class="tab-btn"
+          onclick="App.switchTab('tab-ttd')"
+        >
           Tanda Tangan
         </button>
       </div>
@@ -516,7 +525,7 @@
       <div class="sidebar-content">
         <div id="tab-umum" class="tab-panel active">
           <div class="form-group">
-            <label>Judul Laporan (Daftar Hadir)</label>
+            <label>Judul Laporan</label>
             <input
               type="text"
               id="judulLaporan"
@@ -524,7 +533,6 @@
               oninput="App.render()"
             />
           </div>
-
           <div class="form-group">
             <label>Periode Absensi</label>
             <div class="row-inputs">
@@ -537,24 +545,65 @@
               />
             </div>
           </div>
-
           <div class="form-group">
-            <label>Mode Absen</label>
-            <select id="modeAbsen" onchange="App.render()">
-              <option value="shift">Mode Shift (P, S, M, L)</option>
-              <option value="admin">Mode Status (H, S, I, A)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Hari Libur</label>
+            <label>Opsi Baris</label>
             <div
               style="
                 display: flex;
                 align-items: center;
                 gap: 8px;
-                margin-bottom: 5px;
+                background: #fff;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
               "
+            >
+              <input
+                type="checkbox"
+                id="toggleShift"
+                style="width: auto; margin: 0; cursor: pointer;"
+                onchange="App.render()"
+                checked
+              />
+              <span
+                style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                onclick="document.getElementById('toggleShift').click()"
+                >Tampilkan Baris Shift</span
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Mode Daftar Hadir</label>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: #fff;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+              "
+            >
+              <input
+                type="checkbox"
+                id="modeTim"
+                style="width: auto; margin: 0; cursor: pointer;"
+                onchange="App.render()"
+              />
+              <span
+                style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                onclick="document.getElementById('modeTim').click()"
+                >Mode Tim</span
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Hari Libur</label>
+            <div
+              style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;"
             >
               <input
                 type="checkbox"
@@ -571,42 +620,27 @@
               oninput="App.render()"
             />
           </div>
-
-          <div class="form-group">
-            <label>Magic Fill (Isi Cepat)</label>
-            <div class="row-inputs">
-              <select id="fillValue">
-                <option value="P">P (Pagi)</option>
-                <option value="S">S (Siang)</option>
-                <option value="M">M (Malam)</option>
-                <option value="H">H (Hadir)</option>
-                <option value="L">L (Libur)</option>
-              </select>
-              <button
-                class="btn btn-primary btn-small"
-                onclick="App.magicFill()"
-              >
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Isi
-              </button>
-            </div>
-            <small style="color: #666; font-size: 10px"
-              >*Mengisi semua kolom kosong pada hari kerja.</small
-            >
-          </div>
-
           <div class="form-group">
             <label>Tampilan</label>
-            <input
-              type="color"
-              id="headerColor"
-              value="#f1f5f9"
-              style="height: 40px; padding: 2px; cursor: pointer"
-              oninput="App.updateColor()"
-            />
+            <div class="row-inputs">
+              <input
+                type="color"
+                id="headerColor"
+                value="#ffffff"
+                style="height: 40px; padding: 2px; cursor: pointer; flex:1;"
+                oninput="App.updateColor()"
+              />
+              <button
+                class="btn btn-outline btn-small"
+                onclick="document.getElementById('logoFile').click()"
+              >
+                Ganti Logo
+              </button>
+            </div>
             <input
               type="text"
               id="logoUrl"
-              placeholder="Logo URL..."
+              placeholder="Atau paste URL Logo..."
               oninput="App.render()"
               style="margin-top: 5px"
             />
@@ -614,13 +648,11 @@
               type="file"
               id="logoFile"
               accept="image/*"
-              style="margin-top: 5px; font-size: 11px"
+              style="display: none"
               onchange="App.handleLogoUpload(this)"
             />
           </div>
-
           <hr style="border-top: 1px dashed #ccc; margin: 20px 0" />
-
           <button class="btn btn-warning" onclick="App.showStats()">
             <i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi
           </button>
@@ -637,11 +669,11 @@
             <input
               type="file"
               id="fileRestore"
+              accept=".json"
               style="display: none"
               onchange="App.restoreData(this)"
             />
           </div>
-
           <button class="btn btn-success" onclick="App.downloadExcel()">
             <i class="fa-solid fa-file-excel"></i> Excel
           </button>
@@ -650,7 +682,7 @@
             style="margin-top: 10px"
             onclick="window.print()"
           >
-            <i class="fa-solid fa-print"></i> PDF
+            <i class="fa-solid fa-print"></i> PDF / Print
           </button>
           <button
             class="btn btn-danger"
@@ -663,17 +695,44 @@
 
         <div id="tab-pegawai" class="tab-panel">
           <div class="form-group">
-            <label>Daftar Nama (1 Baris = 1 Orang)</label>
+            <label>Daftar Nama Pegawai</label>
             <textarea
               id="listNama"
-              style="height: 300px"
-              placeholder="Ketik nama pegawai..."
-              onblur="App.render()"
-            ></textarea>
-            <small style="color: #666; font-size: 11px"
-              >*Klik nama di preview untuk reset baris.</small
-            >
+              style="height: 250px"
+              placeholder="Tulis nama pegawai, format: [TimNama] Nama Pegawai"
+              readonly
+            >[Tim 1] Dr. Budi Santoso
+[Tim 1] Suster Siti Aminah
+[Tim 2] Perawat Joko
+Admin Rina</textarea>
           </div>
+
+          <div
+            class="form-group"
+            style="border-top: 1px solid #cbd5e1; padding-top: 15px"
+          >
+            <label>Tambah Pegawai Baru</label>
+            <input type="text" id="newNama" placeholder="Ketik nama pegawai baru" />
+            <select id="newTim" style="margin-top: 5px">
+              <option value="">-- Pilih Tim (Opsional) --</option>
+              <option value="Tim 1">Tim 1</option>
+              <option value="Tim 2">Tim 2</option>
+              <option value="Tim 3">Tim 3</option>
+              <option value="Tim 4">Tim 4</option>
+              <option value="Tim 5">Tim 5</option>
+            </select>
+            <button
+              class="btn btn-primary"
+              style="margin-top: 10px"
+              onclick="App.tambahPegawai()"
+            >
+              <i class="fa fa-plus"></i> Tambah Pegawai
+            </button>
+          </div>
+
+          <small style="color: #666; font-size: 11px; display: block; margin-top: 10px">
+            *Klik nama di preview untuk hapus baris.
+          </small>
         </div>
 
         <div id="tab-ttd" class="tab-panel">
@@ -684,46 +743,54 @@
               id="ttd1_jabatan"
               placeholder="Jabatan (mis: Direktur)"
               class="mb-1"
+              oninput="App.render()"
             />
             <input
               type="text"
               id="ttd1_nama"
               placeholder="Nama Pejabat"
               style="margin-top: 5px"
+              oninput="App.render()"
             />
             <input
               type="text"
               id="ttd1_nip"
               placeholder="NIP"
               style="margin-top: 5px"
+              oninput="App.render()"
             />
           </div>
           <hr />
           <div class="form-group">
             <label>Kanan (Pembuat/Ka. Ruang)</label>
-            <input type="text" id="ttd2_jabatan" placeholder="Jabatan" />
+            <input
+              type="text"
+              id="ttd2_jabatan"
+              placeholder="Jabatan"
+              oninput="App.render()"
+            />
             <input
               type="text"
               id="ttd2_kota"
               placeholder="Kota (mis: Jakarta)"
               style="margin-top: 5px"
+              oninput="App.render()"
             />
             <input
               type="text"
               id="ttd2_nama"
               placeholder="Nama Pegawai"
               style="margin-top: 5px"
+              oninput="App.render()"
             />
             <input
               type="text"
               id="ttd2_nip"
               placeholder="NIP"
               style="margin-top: 5px"
+              oninput="App.render()"
             />
           </div>
-          <button class="btn btn-primary" onclick="App.render()">
-            Terapkan TTD
-          </button>
         </div>
       </div>
     </aside>
@@ -731,11 +798,7 @@
     <main class="main-area">
       <div class="paper">
         <div class="header-section">
-          <img
-            id="viewLogo"
-            src="https://cdn-icons-png.flaticon.com/512/9386/9386918.png"
-            class="logo-img"
-          />
+          <img id="viewLogo" src="" class="logo-img" />
           <div class="header-text">
             <h1 id="viewJudulInstansi">
               RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN
@@ -743,15 +806,10 @@
             <h3 id="viewSubJudul"></h3>
           </div>
         </div>
-
-        <table id="mainTable">
-          <!-- Rendered JS will fill this -->
-        </table>
-        <!-- Area TTD moved inside table dynamically -->
+        <table id="mainTable"></table>
       </div>
     </main>
 
-    <!-- Modal Stats -->
     <div id="statsModal" class="modal-overlay">
       <div class="modal-box">
         <div class="modal-header">
@@ -777,11 +835,8 @@
     </div>
 
     <script>
-      // --- LOGIC APP ---
       const App = {
-        data: {
-          attendance: {},
-        },
+        data: { attendance: {} },
         months: [
           "JANUARI",
           "FEBRUARI",
@@ -796,35 +851,39 @@
           "NOVEMBER",
           "DESEMBER",
         ],
+        timMap: {},
 
         init() {
           const sel = document.getElementById("bulan");
           this.months.forEach((m, i) => sel.add(new Option(m, i)));
-
           const now = new Date();
           sel.value = now.getMonth();
           document.getElementById("tahun").value = now.getFullYear();
-          document.getElementById("listNama").value =
-            "Dr. Budi Santoso\nSuster Siti Aminah\nPerawat Joko\nAdmin Rina";
-
           this.loadState();
           this.render();
+        },
+
+        switchTab(tabId) {
+          document.querySelectorAll(".tab-panel").forEach((el) => el.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((el) => el.classList.remove("active"));
+          document.getElementById(tabId).classList.add("active");
+          document.getElementById("btn-" + tabId).classList.add("active");
         },
 
         handleLogoUpload(input) {
           if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = (e) => {
               document.getElementById("logoUrl").value = e.target.result;
-              App.render();
+              this.render();
             };
             reader.readAsDataURL(input.files[0]);
           }
         },
 
         updateColor() {
-          const col = document.getElementById("headerColor").value;
-          document.documentElement.style.setProperty("--table-header-bg", col);
+          const c = document.getElementById("headerColor").value;
+          document.documentElement.style.setProperty("--table-header-bg", c);
           this.saveState();
         },
 
@@ -832,131 +891,210 @@
           const mIdx = parseInt(document.getElementById("bulan").value);
           const year = parseInt(document.getElementById("tahun").value);
           const daysInMonth = new Date(year, mIdx + 1, 0).getDate();
-          const manualHolidays = document
-            .getElementById("libur")
-            .value.split(",")
-            .map((n) => parseInt(n));
+          const liburVal = document.getElementById("libur").value || "";
+          const manualHolidays = liburVal.split(",").map((n) => parseInt(n.trim()));
           const sabtuLibur = document.getElementById("sabtuLibur").checked;
 
           let days = [];
           for (let d = 1; d <= daysInMonth; d++) {
-            let dateObj = new Date(year, mIdx, d);
-            let dayNum = dateObj.getDay(); // 0 Sun, 6 Sat
-            let isHol =
-              manualHolidays.includes(d) ||
-              dayNum === 0 ||
-              (sabtuLibur && dayNum === 6);
-            days.push({ d, isHol });
+            const dateObj = new Date(year, mIdx, d);
+            const dayNum = dateObj.getDay();
+            const isHol = manualHolidays.includes(d) || dayNum === 0 || (sabtuLibur && dayNum === 6);
+            let isToday = false; // nonaktif highlight today
+            days.push({ d, isHol, isToday });
           }
           return days;
+        },
+
+        tambahPegawai() {
+          const newNama = document.getElementById("newNama").value.trim();
+          if (!newNama) {
+            alert("Nama pegawai baru harus diisi!");
+            return;
+          }
+          const newTim = document.getElementById("newTim").value.trim();
+          let listNama = document.getElementById("listNama").value.trim();
+          if (listNama) listNama += "\n";
+          if (newTim) {
+            listNama += `[${newTim}] ${newNama}`;
+          } else {
+            listNama += newNama;
+          }
+          document.getElementById("listNama").value = listNama;
+          document.getElementById("newNama").value = "";
+          document.getElementById("newTim").value = "";
+          this.render();
         },
 
         render() {
           this.saveState();
 
-          // Ambil Judul Laporan yang bisa diedit
           const judulLaporan = document.getElementById("judulLaporan").value;
-
           const mIdx = parseInt(document.getElementById("bulan").value);
           const year = parseInt(document.getElementById("tahun").value);
-          const names = document
-            .getElementById("listNama")
+          const namesRaw = document.getElementById("listNama")
             .value.split("\n")
             .filter((n) => n.trim());
-          const mode = document.getElementById("modeAbsen").value;
+
+          const modeTim = document.getElementById("modeTim").checked;
+          const showShift = document.getElementById("toggleShift").checked;
+
+          // Parse tim dan nama
+          this.timMap = {};
+          let names = [];
+          namesRaw.forEach((line, idx) => {
+            let match = line.match(/^\s*\[(.+?)\]\s*(.+)$/);
+            if (match) {
+              this.timMap[idx] = match[1];
+              names.push(match[2]);
+            } else {
+              this.timMap[idx] = null;
+              names.push(line.trim());
+            }
+          });
+
+          // Grouping by tim for modeTim
+          let groupedData = [];
+          if (modeTim) {
+            let mapTim = {};
+            names.forEach((name, i) => {
+              let t = this.timMap[i] || "__--NO-TIM--__";
+              if (!mapTim[t]) mapTim[t] = [];
+              mapTim[t].push({ idx: i, name });
+            });
+            groupedData = Object.entries(mapTim).map(([tim, members]) => ({
+              tim: tim === "__--NO-TIM--__" ? null : tim,
+              members,
+            }));
+          } else {
+            groupedData = [{ tim: null, members: names.map((name, i) => ({ idx: i, name })) }];
+          }
+
           const logo =
             document.getElementById("logoUrl").value ||
             "https://cdn-icons-png.flaticon.com/512/9386/9386918.png";
           const daysData = this.getDaysArray();
 
-          // Judul Instansi FIX (Sudah di HTML, tapi kita pastikan di sini kalau-kalau direload)
           document.getElementById("viewJudulInstansi").innerText =
             "RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN";
-
-          // Update Sub Judul (Judul Laporan + Bulan)
           document.getElementById(
             "viewSubJudul"
           ).innerText = `${judulLaporan} - BULAN ${this.months[mIdx]} ${year}`;
-
           document.getElementById("viewLogo").src = logo;
 
+          // Header table
           let html = `<thead><tr>
-                    <th class="col-no" rowspan="2">NO</th>
-                    <th class="col-nama" rowspan="2" style="text-align:center;">NAMA PEGAWAI</th>
-                    <th colspan="${daysData.length}">TANGGAL</th>
-                </tr><tr>`;
-
+        <th class="col-no" rowspan="2">NO</th>
+        <th class="col-nama" rowspan="2" style="text-align:center;">NAMA PEGAWAI</th>
+        <th colspan="${daysData.length}">TANGGAL</th>
+      </tr><tr>`;
           daysData.forEach((day) => {
-            let cls = day.isHol ? "st-libur" : "";
+            const cls = day.isHol ? "st-libur" : "";
             html += `<th class="${cls}" style="width:24px;">${day.d}</th>`;
           });
           html += `</tr></thead><tbody>`;
 
-          const rowsConfig =
-            mode === "shift"
-              ? [
-                  { lbl: "Shift", key: "shift" },
-                  { lbl: "Datang", key: "in" },
-                  { lbl: "Paraf", key: "sign_in" },
-                  { lbl: "Pulang", key: "out" },
-                  { lbl: "Paraf", key: "sign_out" },
-                ]
-              : [
-                  { lbl: "Status", key: "stat" },
-                  { lbl: "Datang", key: "in" },
-                  { lbl: "Paraf", key: "sign_in" },
-                  { lbl: "Pulang", key: "out" },
-                  { lbl: "Paraf", key: "sign_out" },
-                ];
+          let rowsConfig = [];
+          if (modeTim) {
+            if (showShift) rowsConfig = [{ lbl: "Shift", key: "shift" }];
+          } else {
+            rowsConfig = [
+              ...(showShift ? [{ lbl: "Shift", key: "shift" }] : []),
+              { lbl: "Datang", key: "in" },
+              { lbl: "Paraf", key: "sign_in" },
+              { lbl: "Pulang", key: "out" },
+              { lbl: "Paraf", key: "sign_out" },
+            ];
+          }
 
-          names.forEach((name, idx) => {
-            html += `<tr>
-                        <td rowspan="${
-                          rowsConfig.length + 1
-                        }" style="font-weight:bold; border-bottom:2px solid #000;">${
-              idx + 1
-            }</td>
-                        <td colspan="${
-                          daysData.length + 1
-                        }" class="col-nama" title="Klik untuk hapus baris ini" onclick="App.clearRow(${idx})" style="border-bottom:none;">${name}</td>
-                    </tr>`;
+          let anggotaNo = 1;
+          groupedData.forEach((group) => {
+            if (modeTim && group.tim !== null) {
+              // baris header shift tim
+              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px;">
+                Shift <span style="font-weight:bold;">(${group.tim})</span>
+              </td></tr>`;
+            }
 
-            rowsConfig.forEach((cfg, rIdx) => {
-              let isLast = rIdx === rowsConfig.length - 1;
-              let borderStyle = isLast ? "border-bottom:2px solid #000;" : "";
+            group.members.forEach(({ idx, name }) => {
+              html += `<tr>
+              <td rowspan="${rowsConfig.length + 1}" style="font-weight:bold; border-bottom:2px solid #000;">${anggotaNo++}</td>
+              <td colspan="${daysData.length + 1}" class="col-nama" title="Klik untuk hapus baris ini" onclick="App.clearRow(${idx})" style="border-bottom:none;">${name}</td>
+            </tr>`;
 
-              html += `<tr style="${borderStyle}">
-                            <td class="col-ket">${cfg.lbl}</td>`;
+              rowsConfig.forEach((cfg, rIdx) => {
+                let borderStyle = rIdx === rowsConfig.length - 1 ? "border-bottom:2px solid #000;" : "";
+                html += `<tr style="${borderStyle}"><td class="col-ket">${cfg.lbl}</td>`;
 
-              daysData.forEach((day) => {
-                let bgClass = day.isHol ? "st-libur" : "";
-                let cellKey = `${idx}-${day.d}-${cfg.key}`;
-                let val = this.data.attendance[cellKey] || "";
-                let clickAttr = "";
-                let textClass = "";
+                daysData.forEach((day) => {
+                  const bgClass = day.isHol ? "st-libur" : "";
+                  let val = "";
 
-                if (rIdx === 0) {
-                  clickAttr = `onclick="App.cycleCell('${cellKey}', this, '${mode}')"`;
-                  textClass = "cell-input";
-                  if (["L", "M", "A", "S"].includes(val))
-                    textClass += " text-danger";
-                }
+                  if (modeTim && cfg.key === "shift") {
+                    const timName = this.timMap[idx];
+                    if (timName) {
+                      const firstIdx = Object.entries(this.timMap).find(([i, t]) => t === timName);
+                      if (firstIdx) {
+                        val = this.data.attendance[`${firstIdx[0]}-${day.d}-shift`] || "";
+                      }
+                    } else {
+                      val = this.data.attendance[`${idx}-${day.d}-shift`] || "";
+                    }
+                  } else if (!modeTim) {
+                    val = this.data.attendance[`${idx}-${day.d}-${cfg.key}`] || "";
+                  }
 
-                html += `<td class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
+                  let clickAttr = "";
+                  let textClass = "";
+                  if (cfg.key === "shift" && showShift) {
+                    clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${this.timMap[idx]}', ${day.d}, this)"`;
+                    textClass = "cell-input";
+                  }
+
+                  html += `<td class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
+                });
+
+                html += `</tr>`;
               });
-              html += `</tr>`;
             });
           });
 
-          // --- INTEGRASI TTD KE DALAM TABEL ---
-          const totalCols = 2 + daysData.length;
-          html += this.getTTDHTML(year, mIdx, daysData.length, totalCols);
-
+          html += this.getTTDHTML(year, mIdx, daysData.length, 2 + daysData.length);
           html += `</tbody>`;
+
           document.getElementById("mainTable").innerHTML = html;
         },
 
-        // Helper baru untuk generate HTML Tanda Tangan dalam Baris Tabel
+        cycleShiftTeam(idx, timName, day, el) {
+          const cycles = ["", "P", "S", "M", "L"];
+          let currVal = el.innerText;
+          let currIdx = cycles.indexOf(currVal);
+          if (currIdx === -1) currIdx = 0;
+          let nextVal = cycles[(currIdx + 1) % cycles.length];
+
+          if (timName) {
+            for (let [i, t] of Object.entries(App.timMap)) {
+              if (t === timName) {
+                App.data.attendance[`${i}-${day}-shift`] = nextVal;
+              }
+            }
+          } else {
+            App.data.attendance[`${idx}-${day}-shift`] = nextVal;
+          }
+          App.saveState();
+          App.render();
+        },
+
+        clearRow(idx) {
+          if (confirm(`Hapus semua data absensi untuk baris pegawai ke-${idx + 1}?`)) {
+            const prefix = `${idx}-`;
+            Object.keys(this.data.attendance).forEach((k) => {
+              if (k.startsWith(prefix)) delete this.data.attendance[k];
+            });
+            this.render();
+          }
+        },
+
         getTTDHTML(year, mIdx, daysCount, colspan) {
           const fields = [
             "ttd1_jabatan",
@@ -968,113 +1106,93 @@
             "ttd2_nip",
           ];
           const v = {};
-          fields.forEach(
-            (f) =>
-              (v[f] = document.getElementById(f).value || "..................")
-          );
-
+          fields.forEach((f) => (v[f] = document.getElementById(f).value || ".................."));
           return `
-                    <tr class="signature-row">
-                        <td colspan="${colspan}">
-                            <div class="footer-ttd">
-                                <div class="ttd-block">
-                                    <p>Mengetahui,<br>${v.ttd1_jabatan}</p>
-                                    <div class="ttd-space"></div>
-                                    <p><u><b>${v.ttd1_nama}</b></u><br>NIP. ${v.ttd1_nip}</p>
-                                </div>
-                                <div class="ttd-block">
-                                    <p>${v.ttd2_kota}, ${daysCount} ${this.months[mIdx]} ${year}<br>${v.ttd2_jabatan}</p>
-                                    <div class="ttd-space"></div>
-                                    <p><u><b>${v.ttd2_nama}</b></u><br>NIP. ${v.ttd2_nip}</p>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+          <tr class="signature-row">
+            <td colspan="${colspan}">
+              <div class="footer-ttd">
+                <div class="ttd-block">
+                  <p>Mengetahui,<br>${v.ttd1_jabatan}</p>
+                  <div class="ttd-space"></div>
+                  <p><u><b>${v.ttd1_nama}</b></u><br>NIP. ${v.ttd1_nip}</p>
+                </div>
+                <div class="ttd-block">
+                  <p>${v.ttd2_kota}, ${daysCount} ${this.months[mIdx]} ${year}<br>${v.ttd2_jabatan}</p>
+                  <div class="ttd-space"></div>
+                  <p><u><b>${v.ttd2_nama}</b></u><br>NIP. ${v.ttd2_nip}</p>
+                </div>
+              </div>
+            </td>
+          </tr>`;
         },
 
-        cycleCell(key, el, mode) {
-          const cycles =
-            mode === "shift"
-              ? ["", "P", "S", "M", "L"]
-              : ["", "H", "S", "I", "A", "C"];
-
-          let currIdx = cycles.indexOf(el.innerText);
-          if (currIdx === -1) currIdx = 0;
-          let nextVal = cycles[(currIdx + 1) % cycles.length];
-
-          el.innerText = nextVal;
-          this.data.attendance[key] = nextVal;
-          this.saveState();
-
-          el.className = el.className.replace(" text-danger", "");
-          if (["L", "M", "A", "S"].includes(nextVal))
-            el.className += " text-danger";
+        saveState() {
+          const state = {
+            attendance: this.data.attendance,
+            inputs: {
+              judulLaporan: document.getElementById("judulLaporan").value,
+              bulan: document.getElementById("bulan").value,
+              tahun: document.getElementById("tahun").value,
+              toggleShift: document.getElementById("toggleShift").checked,
+              modeTim: document.getElementById("modeTim").checked,
+              sabtuLibur: document.getElementById("sabtuLibur").checked,
+              libur: document.getElementById("libur").value,
+              listNama: document.getElementById("listNama").value,
+              headerColor: document.getElementById("headerColor").value,
+              logoUrl: document.getElementById("logoUrl").value,
+              ttd1_jabatan: document.getElementById("ttd1_jabatan").value,
+              ttd1_nama: document.getElementById("ttd1_nama").value,
+              ttd1_nip: document.getElementById("ttd1_nip").value,
+              ttd2_jabatan: document.getElementById("ttd2_jabatan").value,
+              ttd2_kota: document.getElementById("ttd2_kota").value,
+              ttd2_nama: document.getElementById("ttd2_nama").value,
+              ttd2_nip: document.getElementById("ttd2_nip").value,
+            },
+          };
+          localStorage.setItem("absenProData", JSON.stringify(state));
         },
 
-        // --- NEW FEATURES ---
-
-        magicFill() {
-          const fillVal = document.getElementById("fillValue").value;
-          const names = document
-            .getElementById("listNama")
-            .value.split("\n")
-            .filter((n) => n.trim());
-          const daysData = this.getDaysArray();
-          const mode = document.getElementById("modeAbsen").value;
-          const keyType = mode === "shift" ? "shift" : "stat";
-
-          let changed = false;
-          names.forEach((_, idx) => {
-            daysData.forEach((day) => {
-              // Jangan isi jika hari libur atau sudah ada isinya
-              if (!day.isHol) {
-                let key = `${idx}-${day.d}-${keyType}`;
-                if (!this.data.attendance[key]) {
-                  this.data.attendance[key] = fillVal;
-                  changed = true;
+        loadState() {
+          const saved = localStorage.getItem("absenProData");
+          if (saved) {
+            try {
+              const state = JSON.parse(saved);
+              this.data.attendance = state.attendance || {};
+              if (state.inputs) {
+                for (const [k, v] of Object.entries(state.inputs)) {
+                  const el = document.getElementById(k);
+                  if (el) {
+                    if (el.type === "checkbox") el.checked = v;
+                    else el.value = v;
+                  }
                 }
+                this.timMap = {}; // reset timMap, nanti akan diisi ulang di render
+                document.documentElement.style.setProperty("--table-header-bg", state.inputs.headerColor);
               }
-            });
-          });
-
-          if (changed) {
-            this.render();
-            alert("Berhasil mengisi otomatis!");
-          } else {
-            alert("Tidak ada sel kosong di hari kerja.");
-          }
-        },
-
-        clearRow(idx) {
-          if (
-            confirm(
-              `Hapus semua data absensi untuk baris pegawai ke-${idx + 1}?`
-            )
-          ) {
-            const prefix = `${idx}-`;
-            Object.keys(this.data.attendance).forEach((k) => {
-              if (k.startsWith(prefix)) delete this.data.attendance[k];
-            });
-            this.render();
+            } catch (e) {
+              console.error("Load state error", e);
+            }
           }
         },
 
         showStats() {
-          const names = document
-            .getElementById("listNama")
-            .value.split("\n")
-            .filter((n) => n.trim());
+          const namesRaw = document.getElementById("listNama").value.split("\n").filter((n) => n.trim());
+          const modeTim = document.getElementById("modeTim").checked;
           const daysData = this.getDaysArray();
-          const mode = document.getElementById("modeAbsen").value;
-          const keyType = mode === "shift" ? "shift" : "stat";
-
+          const names = [];
+          const timMap = {};
+          namesRaw.forEach((line, idx) => {
+            let match = line.match(/^\s*\[(.+?)\]\s*(.+)$/);
+            if (match) {
+              timMap[idx] = match[1];
+              names.push(match[2]);
+            } else {
+              timMap[idx] = null;
+              names.push(line.trim());
+            }
+          });
           let html = `<thead><tr><th>Nama Pegawai</th>`;
-
-          // Define columns based on mode
-          const cols =
-            mode === "shift" ? ["P", "S", "M", "L"] : ["H", "S", "I", "A", "C"];
-
+          let cols = ["P", "S", "M", "L"];
           cols.forEach((c) => (html += `<th>${c}</th>`));
           html += `<th>Total</th></tr></thead><tbody>`;
 
@@ -1082,162 +1200,53 @@
             let counts = {};
             cols.forEach((c) => (counts[c] = 0));
             let total = 0;
-
             daysData.forEach((day) => {
-              let key = `${idx}-${day.d}-${keyType}`;
-              let val = this.data.attendance[key];
-              if (val && counts[val] !== undefined) {
-                counts[val]++;
-                total++;
+              let keys = [];
+              if (modeTim) {
+                let t = timMap[idx];
+                if (t) {
+                  let firstIdx = Object.entries(timMap).find(([i, x]) => x === t);
+                  if (firstIdx) {
+                    keys.push(`${firstIdx[0]}-${day.d}-shift`);
+                  }
+                } else {
+                  keys.push(`${idx}-${day.d}-shift`);
+                }
+              } else {
+                keys.push(`${idx}-${day.d}-shift`);
               }
+              keys.forEach((k) => {
+                let val = this.data.attendance[k];
+                if (val && counts[val] !== undefined) {
+                  counts[val]++;
+                  total++;
+                }
+              });
             });
-
             html += `<tr><td style="text-align:left; font-weight:bold;">${name}</td>`;
             cols.forEach((c) => (html += `<td>${counts[c]}</td>`));
             html += `<td>${total}</td></tr>`;
           });
-
           html += `</tbody>`;
           document.getElementById("statTableContent").innerHTML = html;
           document.getElementById("statsModal").style.display = "flex";
         },
 
-        backupData() {
-          this.saveState();
-          const json = localStorage.getItem("AbsenPro_Ult_v2");
-          const blob = new Blob([json], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `Backup_Absen_${new Date()
-            .toISOString()
-            .slice(0, 10)}.json`;
-          a.click();
-        },
-
-        restoreData(input) {
-          if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              try {
-                const data = JSON.parse(e.target.result);
-                localStorage.setItem("AbsenPro_Ult_v2", JSON.stringify(data));
-                alert("Data berhasil dipulihkan!");
-                location.reload();
-              } catch (err) {
-                alert("File backup tidak valid.");
-              }
-            };
-            reader.readAsText(input.files[0]);
-          }
-        },
-
         downloadExcel() {
           const table = document.getElementById("mainTable");
           const wb = XLSX.utils.table_to_book(table, { sheet: "Absensi" });
-          const ws = wb.Sheets["Absensi"];
-          // Simple styling fix for excel
-          const range = XLSX.utils.decode_range(ws["!ref"]);
-          for (let R = range.s.r; R <= range.e.r; ++R) {
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-              const cell_ref = XLSX.utils.encode_cell({ c: C, r: R });
-              if (!ws[cell_ref]) continue;
-              if (!ws[cell_ref].s) ws[cell_ref].s = {};
-              ws[cell_ref].s.border = {
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                left: { style: "thin" },
-                right: { style: "thin" },
-              };
-              ws[cell_ref].s.alignment = {
-                horizontal: "center",
-                vertical: "center",
-              };
-            }
-          }
-          XLSX.writeFile(
-            wb,
-            `Absensi_${document.getElementById("bulan").value}.xlsx`
-          );
-        },
-
-        saveState() {
-          const state = {
-            judul: document.getElementById("judulLaporan").value, // Simpan judul laporan custom
-            bulan: document.getElementById("bulan").value,
-            tahun: document.getElementById("tahun").value,
-            names: document.getElementById("listNama").value,
-            libur: document.getElementById("libur").value,
-            sabtuLibur: document.getElementById("sabtuLibur").checked,
-            mode: document.getElementById("modeAbsen").value,
-            color: document.getElementById("headerColor").value,
-            logo: document.getElementById("logoUrl").value,
-            ttd: {
-              t1j: document.getElementById("ttd1_jabatan").value,
-              t1n: document.getElementById("ttd1_nama").value,
-              t1i: document.getElementById("ttd1_nip").value,
-              t2j: document.getElementById("ttd2_jabatan").value,
-              t2k: document.getElementById("ttd2_kota").value,
-              t2n: document.getElementById("ttd2_nama").value,
-              t2i: document.getElementById("ttd2_nip").value,
-            },
-            data: this.data.attendance,
-          };
-          localStorage.setItem("AbsenPro_Ult_v2", JSON.stringify(state));
-        },
-
-        loadState() {
-          const json = localStorage.getItem("AbsenPro_Ult_v2");
-          if (!json) return;
-          const s = JSON.parse(json);
-
-          document.getElementById("judulLaporan").value =
-            s.judul || "DAFTAR HADIR PEGAWAI"; // Load judul custom
-          document.getElementById("bulan").value = s.bulan || 0;
-          document.getElementById("tahun").value =
-            s.tahun || new Date().getFullYear();
-          document.getElementById("listNama").value = s.names || "";
-          document.getElementById("libur").value = s.libur || "";
-          document.getElementById("sabtuLibur").checked = s.sabtuLibur || false;
-          document.getElementById("modeAbsen").value = s.mode || "shift";
-          document.getElementById("headerColor").value = s.color || "#f1f5f9";
-          document.getElementById("logoUrl").value = s.logo || "";
-
-          if (s.ttd) {
-            document.getElementById("ttd1_jabatan").value = s.ttd.t1j || "";
-            document.getElementById("ttd1_nama").value = s.ttd.t1n || "";
-            document.getElementById("ttd1_nip").value = s.ttd.t1i || "";
-            document.getElementById("ttd2_jabatan").value = s.ttd.t2j || "";
-            document.getElementById("ttd2_kota").value = s.ttd.t2k || "";
-            document.getElementById("ttd2_nama").value = s.ttd.t2n || "";
-            document.getElementById("ttd2_nip").value = s.ttd.t2i || "";
-          }
-
-          this.data.attendance = s.data || {};
-          document.documentElement.style.setProperty(
-            "--table-header-bg",
-            s.color || "#f1f5f9"
-          );
+          const bulan = document.getElementById("bulan").options[document.getElementById("bulan").selectedIndex].text;
+          const tahun = document.getElementById("tahun").value;
+          XLSX.writeFile(wb, `Absensi_${bulan}_${tahun}.xlsx`);
         },
 
         resetData() {
-          if (confirm("Hapus semua data dan mulai dari awal?")) {
-            localStorage.removeItem("AbsenPro_Ult_v2");
+          if (confirm("Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?")) {
+            localStorage.removeItem("absenProData");
             location.reload();
           }
         },
       };
-
-      function switchTab(tabId) {
-        document
-          .querySelectorAll(".tab-panel")
-          .forEach((el) => el.classList.remove("active"));
-        document
-          .querySelectorAll(".tab-btn")
-          .forEach((el) => el.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
-        event.target.classList.add("active");
-      }
 
       window.onload = () => App.init();
     </script>
