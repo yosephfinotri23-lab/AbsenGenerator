@@ -15,18 +15,40 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
     <style>
       :root {
-        --primary: #6366f1; /* Indigo lebih soft */
+        /* -- Light Theme Variables -- */
+        --primary: #6366f1;
         --primary-dark: #4f46e5;
         --secondary: #64748b;
-        --bg-body: #f8fafc; /* Lebih terang */
+        --bg-body: #f8fafc;
         --bg-panel: #ffffff;
         --border: #e2e8f0;
+        --text-main: #334155;
+        --text-muted: #64748b;
+        --input-bg: #ffffff;
+        --input-border: #cbd5e1;
         --danger: #ef4444;
         --success: #10b981;
         --warning: #f59e0b;
         --paper-width: 297mm;
         --table-header-bg: transparent;
+        --card-bg: #f8fafc;
       }
+
+      /* -- Dark Theme Variables -- */
+      body.dark-mode {
+        --primary: #818cf8;
+        --primary-dark: #6366f1;
+        --secondary: #94a3b8;
+        --bg-body: #0f172a;
+        --bg-panel: #1e293b;
+        --border: #334155;
+        --text-main: #f1f5f9;
+        --text-muted: #cbd5e1;
+        --input-bg: #0f172a;
+        --input-border: #475569;
+        --card-bg: #0f172a;
+      }
+
       * {
         box-sizing: border-box;
         outline: none;
@@ -34,14 +56,15 @@
       body {
         font-family: "Inter", sans-serif;
         background: var(--bg-body);
+        color: var(--text-main);
         margin: 0;
         display: flex;
         height: 100vh;
-        color: #334155;
         overflow: hidden;
+        transition: background-color 0.3s, color 0.3s;
       }
       
-      /* --- Sidebar Styling Enhanced --- */
+      /* --- Sidebar Styling --- */
       .sidebar {
         width: 360px;
         background: var(--bg-panel);
@@ -51,17 +74,23 @@
         z-index: 20;
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03);
         flex-shrink: 0;
+        transition: background-color 0.3s, border-color 0.3s;
       }
       .brand {
-        padding: 24px 20px;
+        padding: 20px 20px;
         border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Memisahkan judul dan toggle */
+      }
+      .brand-left {
         display: flex;
         align-items: center;
         gap: 12px;
       }
       .brand-icon {
         background: #e0e7ff;
-        color: var(--primary);
+        color: #4f46e5; /* Keep icon color consistent or adjust if needed */
         width: 40px;
         height: 40px;
         border-radius: 10px;
@@ -69,6 +98,10 @@
         align-items: center;
         justify-content: center;
         font-size: 1.2rem;
+      }
+      body.dark-mode .brand-icon {
+        background: #312e81;
+        color: #a5b4fc;
       }
       .brand-text {
         display: flex;
@@ -89,304 +122,219 @@
         letter-spacing: 0.5px;
       }
 
+      /* Dark Mode Toggle Button */
+      .theme-toggle {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--secondary);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .theme-toggle:hover {
+        background: var(--bg-body);
+        color: var(--primary);
+        transform: rotate(15deg);
+      }
+
       .tabs {
         display: flex;
-        background: #ffffff;
+        background: var(--bg-panel);
         padding: 10px 15px 0 15px;
         gap: 5px;
         border-bottom: 1px solid var(--border);
         overflow-x: auto;
+        transition: background-color 0.3s;
       }
+      
       .tab-btn {
         flex: 1;
         padding: 10px;
         border: none;
-        border-bottom: 2px solid transparent;
         background: transparent;
         cursor: pointer;
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--secondary);
-        transition: 0.2s;
         white-space: nowrap;
+        position: relative;
       }
-      .tab-btn.active {
+      
+      .tab-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background-color: var(--primary);
+        transition: width 0.2s ease-in-out;
+        border-radius: 3px 3px 0 0;
+      }
+
+      .tab-btn:hover {
         color: var(--primary);
-        border-bottom-color: var(--primary);
+        background: var(--bg-body);
       }
-      .tab-btn:hover:not(.active) {
-        color: var(--primary-dark);
-        background: #f8fafc;
-        border-radius: 6px 6px 0 0;
-      }
+      .tab-btn:hover::after { width: 100%; }
+      .tab-btn.active { color: var(--primary); }
+      .tab-btn.active::after { width: 100%; }
 
       .sidebar-content {
         flex: 1;
         overflow-y: auto;
         padding: 20px;
       }
-      
-      /* Scrollbar halus */
-      .sidebar-content::-webkit-scrollbar {
-        width: 6px;
-      }
-      .sidebar-content::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 3px;
-      }
+      .sidebar-content::-webkit-scrollbar { width: 6px; }
+      .sidebar-content::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 3px; }
 
       .tab-panel {
         display: none;
         animation: fadeIn 0.3s ease-out;
       }
-      .tab-panel.active {
-        display: block;
-      }
+      .tab-panel.active { display: block; }
       
-      .form-group {
-        margin-bottom: 18px;
-      }
+      .form-group { margin-bottom: 18px; }
       .form-group label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 8px;
-        letter-spacing: 0.5px;
+        display: block; font-size: 0.75rem; font-weight: 700;
+        text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px;
       }
       
-      input[type="text"],
-      input[type="number"],
-      select,
-      textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        background: #ffffff;
-        color: #334155;
+      input[type="text"], input[type="number"], select, textarea {
+        width: 100%; padding: 10px 12px; border: 1px solid var(--input-border);
+        border-radius: 8px; font-size: 0.9rem; transition: all 0.2s;
+        background: var(--input-bg); color: var(--text-main);
       }
-      input:focus,
-      textarea:focus,
-      select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-        outline: none;
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); outline: none;
       }
-      textarea {
-        resize: vertical;
-        min-height: 100px;
-        font-family: monospace;
-        line-height: 1.4;
-      }
+      textarea { resize: vertical; min-height: 100px; font-family: monospace; line-height: 1.4; }
       
       .card-options {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px;
+        background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
       }
+      .row-inputs { display: flex; gap: 10px; }
       
-      .row-inputs {
-        display: flex;
-        gap: 10px;
-      }
-      
-      /* Button Styles Refined */
       .btn {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        gap: 8px; transition: all 0.2s; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
       .btn:active { transform: translateY(1px); }
-      
       .btn-primary { background: var(--primary); color: white; }
       .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
       
-      .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; margin-top: 10px; }
-      .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+      .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
+      .btn-outline:hover { background: var(--bg-body); border-color: var(--secondary); }
       
       .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
       .btn-danger:hover { background: #fecaca; }
+      body.dark-mode .btn-danger { background: #7f1d1d; color: #fecaca; border-color: #991b1b; }
       
       .btn-success { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; margin-top: 10px; }
       .btn-success:hover { background: #a7f3d0; }
+      body.dark-mode .btn-success { background: #064e3b; color: #a7f3d0; border-color: #065f46; }
       
       .btn-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; margin-top: 10px; }
       .btn-warning:hover { background: #fde68a; }
+      body.dark-mode .btn-warning { background: #78350f; color: #fde68a; border-color: #92400e; }
 
       .btn-small { padding: 6px 12px; font-size: 0.8rem; width: auto; display: inline-flex; }
 
-      /* Main Area */
       .main-area {
-        flex: 1;
-        overflow: auto;
-        padding: 40px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        position: relative;
-        background-color: #eef2f6; /* Abu kebiruan */
+        flex: 1; overflow: auto; padding: 40px; display: flex;
+        justify-content: center; align-items: flex-start;
+        position: relative; background-color: var(--bg-body);
+        transition: background-color 0.3s;
       }
+      
+      /* Kertas selalu putih agar terlihat seperti kertas asli */
       .paper {
-        background: white;
-        width: var(--paper-width);
-        min-width: var(--paper-width);
-        min-height: 210mm;
-        padding: 15mm 10mm;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        border-radius: 2px;
-        position: relative;
+        background: white; width: var(--paper-width); min-width: var(--paper-width); min-height: 210mm;
+        padding: 15mm 10mm; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); border-radius: 2px; position: relative;
+        color: #000000; /* Text kertas selalu hitam */
+      }
+      body.dark-mode .paper {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Shadow lebih gelap di dark mode */
       }
       
-      /* --- Report Styling --- */
       .header-section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        border-bottom: 3px double #000;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px;
       }
-      .logo-img {
-        height: 80px;
-        width: 80px;
-        object-fit: contain;
-      }
-      .header-text {
-        text-align: center;
-        color: #000;
-      }
-      .header-text h1 {
-        margin: 0;
-        font-size: 18pt;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      .header-text h3 {
-        margin: 5px 0 0 0;
-        font-size: 12pt;
-        font-weight: normal;
-        text-transform: uppercase;
-      }
+      .logo-img { height: 80px; width: 80px; object-fit: contain; }
+      .header-text { text-align: center; color: #000; }
+      .header-text h1 { margin: 0; font-size: 18pt; text-transform: uppercase; letter-spacing: 1px; }
+      .header-text h3 { margin: 5px 0 0 0; font-size: 12pt; font-weight: normal; text-transform: uppercase; }
       
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 9pt;
-        border: 2px solid #000;
-        table-layout: fixed;
-      }
+      table { width: 100%; border-collapse: collapse; font-size: 9pt; border: 2px solid #000; table-layout: fixed; }
       th, td {
-        border: 1px solid #000;
-        padding: 4px 2px;
-        text-align: center;
-        vertical-align: middle;
-        color: #000;
-        background-color: transparent;
+        border: 1px solid #000; padding: 4px 2px; text-align: center;
+        vertical-align: middle; color: #000; background-color: transparent;
       }
-      thead th {
-        background-color: var(--table-header-bg, transparent);
-        height: 35px;
-        font-weight: bold;
-      }
+      thead th { background-color: var(--table-header-bg, transparent); height: 35px; font-weight: bold; }
       .col-no { width: 30px; }
       .col-nama {
-        width: 220px;
-        text-align: left;
-        padding-left: 8px;
-        font-weight: 700;
-        text-transform: uppercase;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-right: 2px solid #000;
-        cursor: pointer;
+        width: 220px; text-align: left; padding-left: 8px; font-weight: 700;
+        text-transform: uppercase; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; border-right: 2px solid #000; cursor: pointer;
       }
       .col-nama:hover { background-color: #f1f5f9; color: var(--primary); text-decoration: underline; }
       .col-ket {
-        width: 60px;
-        font-size: 8pt;
-        font-style: italic;
-        background: #fafafa;
-        border-right: 2px solid #000;
-        text-align: right;
-        padding-right: 5px;
+        width: 60px; font-size: 8pt; font-style: italic; background: #fafafa;
+        border-right: 2px solid #000; text-align: right; padding-right: 5px;
       }
+      
+      /* Input cells clickable */
       .cell-input {
-        cursor: pointer;
+        cursor: pointer; 
         font-family: "Courier New", monospace;
-        font-weight: bold;
-        font-size: 10pt;
+        font-weight: bold; font-size: 10pt; 
         transition: background 0.1s;
+        user-select: none; /* Mencegah seleksi teks saat klik cepat */
       }
       .cell-input:hover { background-color: #e0e7ff !important; }
       
-      /* Status Colors */
+      /* Status Colors - Tetap sama di light/dark mode karena kertas putih */
       .status-P { color: #000000 !important; font-weight: bold; }
       .status-S { color: #b45309 !important; font-weight: bold; }
       .status-M { color: #16a34a !important; font-weight: bold; }
       .status-L { color: #dc2626 !important; font-weight: bold; }
+      .status-A { color: #dc2626 !important; font-weight: bold; } /* Alpa - Merah */
+      .status-I { color: #000000 !important; font-weight: bold; } /* Izin - Hitam */
       .st-libur { background-color: #fee2e2 !important; color: #991b1b; }
       
-      /* --- Tanda Tangan --- */
-      .signature-row td {
-        border: none !important;
-        padding-top: 30px;
-        background-color: white !important;
-      }
-      .footer-ttd {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding: 0 20px;
-      }
-      .ttd-block {
-        text-align: left; /* Rata Kiri sesuai request */
-        min-width: 220px;
-      }
+      .signature-row td { border: none !important; padding-top: 30px; background-color: white !important; }
+      .footer-ttd { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; }
+      .ttd-block { text-align: left; min-width: 220px; }
       .ttd-space { height: 80px; }
       .ttd-block p { margin: 5px 0; }
 
-      /* Modal */
       .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.5); z-index: 100;
-        display: none; align-items: center; justify-content: center;
-        backdrop-filter: blur(4px);
+        display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
       }
       .modal-box {
-        background: white; width: 600px; max-height: 80vh;
-        border-radius: 12px; padding: 24px; display: flex; flex-direction: column;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        background: var(--bg-panel); color: var(--text-main);
+        width: 600px; max-height: 80vh; border-radius: 12px;
+        padding: 24px; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
       }
       .modal-header {
         font-size: 1.25rem; font-weight: bold; margin-bottom: 20px;
-        display: flex; justify-content: space-between; color: var(--primary-dark);
+        display: flex; justify-content: space-between; color: var(--primary);
       }
       .modal-content { overflow-y: auto; flex: 1; }
       .stat-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; border: none; }
-      .stat-table th, .stat-table td {
-        border: 1px solid #e2e8f0; padding: 10px; text-align: center;
-      }
-      .stat-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
-      .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+      .stat-table th, .stat-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+      .stat-table th { background: var(--bg-body); text-align: left; font-weight: 600; }
+      .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
 
-      /* Responsive */
       @media (max-width: 1024px) {
         body { flex-direction: column; height: auto; overflow-y: auto; }
         .sidebar { width: 100%; height: auto; max-height: none; border-right: none; border-bottom: 1px solid var(--border); overflow-y: visible; }
@@ -394,27 +342,21 @@
         .paper { margin: 0 auto; margin-bottom: 20px; transform: scale(0.8); transform-origin: top center; }
       }
       @media (max-width: 600px) {
-        .brand { padding: 15px; }
-        .main-area { padding: 10px; }
+        .brand { padding: 15px; } .main-area { padding: 10px; }
         .paper { transform: scale(0.5); width: 297mm; }
-        .header-text h1 { font-size: 14pt; }
-        .header-text h3 { font-size: 10pt; }
+        .header-text h1 { font-size: 14pt; } .header-text h3 { font-size: 10pt; }
       }
       
-      /* Print Optimization */
       @media print {
         body { background: white; height: auto; overflow: visible; display: block; }
         .sidebar, .modal-overlay { display: none !important; }
         .main-area { padding: 0; margin: 0; display: block; overflow: visible; width: 100%; height: auto; }
         .paper { box-shadow: none; margin: 0; width: 100% !important; padding: 0; border: none; transform: none !important; }
-        table { font-size: 8pt; }
-        th, td { padding: 1px 2px !important; height: auto !important; }
+        table { font-size: 8pt; } th, td { padding: 1px 2px !important; height: auto !important; }
         thead th { height: 25px !important; }
         .header-section { margin-bottom: 10px; padding-bottom: 5px; }
-        .header-text h1 { margin: 0; font-size: 14pt; }
-        .header-text h3 { margin: 0; font-size: 10pt; }
-        .signature-row td { padding-top: 10px !important; }
-        .ttd-space { height: 50px !important; }
+        .header-text h1 { margin: 0; font-size: 14pt; } .header-text h3 { margin: 0; font-size: 10pt; }
+        .signature-row td { padding-top: 10px !important; } .ttd-space { height: 50px !important; }
         .ttd-block p { margin: 2px 0 !important; line-height: 1.2; }
         tr { page-break-inside: avoid; }
         .keep-with-footer { page-break-inside: avoid !important; break-inside: avoid !important; display: table-row-group; }
@@ -422,29 +364,30 @@
         @page { size: landscape; margin: 5mm; }
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
   </head>
   <body>
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-icon">
-          <i class="fa-solid fa-calendar-days"></i>
+        <div class="brand-left">
+          <div class="brand-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="brand-text">
+            <span class="brand-title">Absen Generator</span>
+            <span class="brand-subtitle">RSUPP Betun</span>
+          </div>
         </div>
-        <div class="brand-text">
-          <span class="brand-title">Absen Generator</span>
-          <span class="brand-subtitle">RSUPP Betun</span>
-        </div>
+        <!-- Tombol Toggle Dark Mode -->
+        <button class="theme-toggle" onclick="App.toggleTheme()" title="Ubah Tema Gelap/Terang">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
       </div>
       
       <div class="tabs">
         <button id="btn-tab-umum" class="tab-btn active" onclick="App.switchTab('tab-umum')">Umum</button>
         <button id="btn-tab-setting" class="tab-btn" onclick="App.switchTab('tab-setting')">Setting</button>
         <button id="btn-tab-pegawai" class="tab-btn" onclick="App.switchTab('tab-pegawai')">Pegawai</button>
-        <button id="btn-tab-ttd" class="tab-btn" onclick="App.switchTab('tab-ttd')">TTD</button>
+        <button id="btn-tab-ttd" class="tab-btn" onclick="App.switchTab('tab-ttd')">Tanda Tangan</button>
       </div>
 
       <div class="sidebar-content">
@@ -468,38 +411,19 @@
                 <input type="checkbox" id="sabtuLibur" style="width: auto" onchange="App.render()" />
                 <span style="font-size: 0.9rem; font-weight:600;">Sabtu Merah</span>
               </div>
-              <input type="text" id="libur" placeholder="Tgl Merah Manual (Cth: 1, 17)" oninput="App.render()" 
-                     style="background: white; border-color: #e2e8f0;" />
+              <input type="text" id="libur" placeholder="Tgl Merah Manual (Cth: 1, 17)" oninput="App.render()" />
             </div>
           </div>
-          
-          <hr style="border-top: 1px dashed #e2e8f0; margin: 24px 0" />
-          
-          <button class="btn btn-warning" onclick="App.showStats()">
-            <i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi
-          </button>
-          
+          <hr style="border-top: 1px dashed var(--border); margin: 24px 0" />
+          <button class="btn btn-warning" onclick="App.showStats()"><i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi</button>
           <div class="row-inputs" style="margin-top: 10px">
-            <button class="btn btn-outline" onclick="App.backupData()">
-              <i class="fa-solid fa-download"></i> Backup
-            </button>
-            <button class="btn btn-outline" onclick="document.getElementById('fileRestore').click()">
-              <i class="fa-solid fa-upload"></i> Restore
-            </button>
+            <button class="btn btn-outline" onclick="App.backupData()"><i class="fa-solid fa-download"></i> Backup</button>
+            <button class="btn btn-outline" onclick="document.getElementById('fileRestore').click()"><i class="fa-solid fa-upload"></i> Restore</button>
             <input type="file" id="fileRestore" accept=".json" style="display: none" onchange="App.restoreData(this)" />
           </div>
-          
-          <button class="btn btn-success" onclick="App.downloadExcel()">
-            <i class="fa-solid fa-file-excel"></i> Excel
-          </button>
-          
-          <button class="btn btn-primary" style="margin-top: 10px" onclick="window.print()">
-            <i class="fa-solid fa-print"></i> PDF / Print
-          </button>
-          
-          <button class="btn btn-danger" style="margin-top: 20px" onclick="App.resetData()">
-            <i class="fa-solid fa-trash"></i> Reset All
-          </button>
+          <button class="btn btn-success" onclick="App.downloadExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          <button class="btn btn-primary" style="margin-top: 10px" onclick="window.print()"><i class="fa-solid fa-print"></i> PDF / Print</button>
+          <button class="btn btn-danger" style="margin-top: 20px" onclick="App.resetData()"><i class="fa-solid fa-trash"></i> Reset All</button>
         </div>
 
         <!-- TAB SETTING -->
@@ -513,11 +437,11 @@
               </div>
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
                 <input type="checkbox" id="toggleDatang" style="width: auto;" onchange="App.render()" checked />
-                <span style="font-size: 0.9rem;">Baris Datang</span>
+                <span style="font-size: 0.9rem;">Baris Jam Datang</span>
               </div>
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
                 <input type="checkbox" id="togglePulang" style="width: auto;" onchange="App.render()" checked />
-                <span style="font-size: 0.9rem;">Baris Pulang</span>
+                <span style="font-size: 0.9rem;">Baris Jam Pulang</span>
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" id="toggleParaf" style="width: auto;" onchange="App.render()" checked />
@@ -525,7 +449,6 @@
               </div>
             </div>
           </div>
-
           <div class="form-group">
             <label>Mode Daftar Hadir</label>
             <div class="card-options" style="display: flex; align-items: center; gap: 8px;">
@@ -533,25 +456,21 @@
               <span style="font-size: 0.9rem; font-weight: 600;">Aktifkan Mode Tim</span>
             </div>
           </div>
-
           <div class="form-group">
             <label>Personalisasi Tampilan</label>
             <div class="row-inputs">
               <input type="color" id="headerColor" value="#ffffff" style="height: 42px; padding: 2px; cursor: pointer; flex:1;" oninput="App.updateColor()" />
-              <button class="btn btn-outline btn-small" onclick="document.getElementById('logoFile').click()">
-                Ganti Logo
-              </button>
+              <button class="btn btn-outline btn-small" onclick="document.getElementById('logoFile').click()">Ganti Logo</button>
             </div>
             <input type="text" id="logoUrl" placeholder="Atau paste URL Logo..." oninput="App.render()" style="margin-top: 10px" />
             <input type="file" id="logoFile" accept="image/*" style="display: none" onchange="App.handleLogoUpload(this)" />
           </div>
         </div>
 
-        <!-- TAB PEGAWAI (REORDERED) -->
+        <!-- TAB PEGAWAI -->
         <div id="tab-pegawai" class="tab-panel">
-          <!-- 1. Tambah Pegawai (Pindah ke atas) -->
-          <div class="form-group" style="background: #e0e7ff; padding: 15px; border-radius: 8px; border: 1px solid #c7d2fe;">
-             <label style="color: #4338ca;">Tambah Pegawai Baru</label>
+          <div class="form-group" style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+             <label style="color: var(--primary);">Tambah Pegawai Baru</label>
              <input type="text" id="newNama" placeholder="Nama Lengkap" />
              <select id="newTim" style="margin-top: 8px">
                <option value="">-- Pilih Tim (Opsional) --</option>
@@ -566,21 +485,15 @@
                <option value="Tim 9">Tim 9</option>
                <option value="Tim 10">Tim 10</option>
              </select>
-             <button class="btn btn-primary" style="margin-top: 10px" onclick="App.tambahPegawai()">
-               <i class="fa fa-plus"></i> Tambahkan
-             </button>
+             <button class="btn btn-primary" style="margin-top: 10px" onclick="App.tambahPegawai()"><i class="fa fa-plus"></i> Tambahkan</button>
           </div>
-
-          <!-- 2. Daftar Nama Pegawai -->
           <div class="form-group">
             <label>Edit Daftar Nama (Massal)</label>
             <textarea id="listNama" style="height: 300px; font-size: 0.85rem;" placeholder="Format: [Tim] Nama" onblur="App.render()">[Tim 1] Dr. Budi Santoso
 [Tim 1] Suster Siti Aminah
 [Tim 2] Perawat Joko
 Admin Rina</textarea>
-            <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 5px">
-              *Klik nama di tabel preview untuk menghapus baris pegawai.
-            </small>
+            <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 5px">*Klik nama di tabel preview untuk menghapus baris pegawai.</small>
           </div>
         </div>
 
@@ -592,7 +505,7 @@ Admin Rina</textarea>
             <input type="text" id="ttd1_nama" placeholder="Nama Pejabat" style="margin-top: 5px" oninput="App.render()" />
             <input type="text" id="ttd1_nip" placeholder="NIP" style="margin-top: 5px" oninput="App.render()" />
           </div>
-          <hr style="border-top: 1px dashed #e2e8f0; margin: 15px 0" />
+          <hr style="border-top: 1px dashed var(--border); margin: 15px 0" />
           <div class="form-group">
             <label>Kanan (Pembuat/Ka. Ruang)</label>
             <input type="text" id="ttd2_jabatan" placeholder="Jabatan" oninput="App.render()" />
@@ -642,8 +555,23 @@ Admin Rina</textarea>
           const now = new Date();
           sel.value = now.getMonth();
           document.getElementById("tahun").value = now.getFullYear();
+          
+          // Load Theme Preference
+          const savedTheme = localStorage.getItem('absenProTheme');
+          if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeIcon').className = 'fa-solid fa-sun';
+          }
+
           this.loadState();
           this.render();
+        },
+
+        toggleTheme() {
+          document.body.classList.toggle('dark-mode');
+          const isDark = document.body.classList.contains('dark-mode');
+          localStorage.setItem('absenProTheme', isDark ? 'dark' : 'light');
+          document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         },
 
         switchTab(tabId) {
@@ -701,9 +629,82 @@ Admin Rina</textarea>
           this.render();
         },
 
-        updateAttendance(idx, day, key, val) {
+        // Helper: Cycle Status ONLY (No typing)
+        handleCellClick(idx, day, key, el) {
+            const val = el.innerText.trim().toUpperCase();
+            
+            // Cycle sequence: Empty -> A -> I -> S -> Empty
+            const cycles = ["", "A", "I", "S"];
+            let currIdx = cycles.indexOf(val);
+            // If unknown value, reset to first in cycle
+            if (currIdx === -1) currIdx = 0; 
+            
+            const nextVal = cycles[(currIdx + 1) % cycles.length];
+            
+            // Update UI immediately (Optimistic UI)
+            el.innerText = nextVal;
+            
+            // Update Data & Smart Status without full re-render
+            this.updateAttendance(idx, day, key, nextVal, false);
+        },
+
+        // Updated: skipRender=true by default to support click cycling without heavy refresh
+        updateAttendance(idx, day, key, val, skipRender = true) {
+            val = val.toUpperCase();
             this.data.attendance[`${idx}-${day}-${key}`] = val;
+
+            // Smart Status Logic
+            const specialStatus = ['A', 'S', 'I'];
+            const relevantKeys = ['in', 'out', 'sign_in', 'sign_out'];
+            
+            // If updating one of the relevant keys with a special status, update others
+            if (relevantKeys.includes(key) && specialStatus.includes(val)) {
+                relevantKeys.forEach(k => {
+                    this.data.attendance[`${idx}-${day}-${k}`] = val;
+                    // Update DOM if we are skipping full render
+                    if (!skipRender) {
+                        const cellId = `cell-${idx}-${day}-${k}`;
+                        const cell = document.getElementById(cellId);
+                        if(cell) {
+                            cell.innerText = val;
+                            // Update classes
+                            cell.className = cell.className.replace(/status-[A-Z]/g, '').trim(); 
+                            cell.classList.add(`status-${val}`);
+                        }
+                    }
+                });
+            } else if (relevantKeys.includes(key) && val === "") {
+                // If clearing status, clear related fields too? 
+                // Maybe better to only clear self, but consistency suggests clearing all for A/I/S logic.
+                // For now, let's just clear logic for consistency if previously it was A/I/S
+                relevantKeys.forEach(k => {
+                    const currentVal = this.data.attendance[`${idx}-${day}-${k}`];
+                    if (specialStatus.includes(currentVal)) {
+                         this.data.attendance[`${idx}-${day}-${k}`] = "";
+                         if (!skipRender) {
+                            const cellId = `cell-${idx}-${day}-${k}`;
+                            const cell = document.getElementById(cellId);
+                            if(cell) {
+                                cell.innerText = "";
+                                cell.className = cell.className.replace(/status-[A-Z]/g, '').trim();
+                            }
+                         }
+                    }
+                });
+            }
+
+            // Also update current cell class if skipping render
+            if (!skipRender) {
+                 const cellId = `cell-${idx}-${day}-${key}`;
+                 const cell = document.getElementById(cellId);
+                 if(cell) {
+                     cell.className = cell.className.replace(/status-[A-Z]/g, '').trim();
+                     if(specialStatus.includes(val)) cell.classList.add(`status-${val}`);
+                 }
+            }
+
             this.saveState();
+            if (skipRender) this.render();
         },
 
         render() {
@@ -763,27 +764,25 @@ Admin Rina</textarea>
 
           let rowsConfig = [];
           if (showShift) rowsConfig.push({ lbl: "Shift", key: "shift" });
-          if (showDatang) rowsConfig.push({ lbl: "Datang", key: "in" });
+          if (showDatang) rowsConfig.push({ lbl: "Jam Datang", key: "in" });
           if (showParaf) rowsConfig.push({ lbl: "Paraf", key: "sign_in" });
-          if (showPulang) rowsConfig.push({ lbl: "Pulang", key: "out" });
+          if (showPulang) rowsConfig.push({ lbl: "Jam Pulang", key: "out" });
           if (showParaf) rowsConfig.push({ lbl: "Paraf", key: "sign_out" });
 
           let anggotaNo = 1;
           groupedData.forEach((group, gIdx) => {
+            const isLastGroup = gIdx === groupedData.length - 1;
+            if (isLastGroup) {
+               html += `</tbody><tbody class="keep-with-footer">`;
+            }
+
             if (modeTim && group.tim !== null) {
-              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px; border-bottom:1px solid #000;">
+              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px; border-bottom:1px solid #000; page-break-after: avoid;">
                 <span style="font-weight:800; color:var(--primary-dark);">${group.tim}</span>
               </td></tr>`;
             }
 
             group.members.forEach(({ idx, name }, mIdx) => {
-              const isLastGroup = gIdx === groupedData.length - 1;
-              const isLastMember = mIdx === group.members.length - 1;
-              
-              if (isLastGroup && isLastMember) {
-                 html += `</tbody><tbody class="keep-with-footer">`;
-              }
-
               html += `<tr>
               <td rowspan="${rowsConfig.length + 1}" style="font-weight:bold; border-bottom:2px solid #000;">${anggotaNo++}</td>
               <td colspan="${daysData.length + 1}" class="col-nama" title="Klik untuk hapus baris ini" onclick="App.clearRow(${idx})" style="border-bottom:none;">${name}</td>
@@ -799,6 +798,9 @@ Admin Rina</textarea>
                   let clickAttr = "";
                   let textClass = "";
                   
+                  // ID for smart updates
+                  const cellId = `cell-${idx}-${day.d}-${cfg.key}`;
+
                   if (cfg.key === "shift") {
                     clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${this.timMap[idx] || ''}', ${day.d}, this)"`;
                     textClass = "cell-input";
@@ -806,9 +808,17 @@ Admin Rina</textarea>
                     else if (val === 'S') textClass += " status-S";
                     else if (val === 'M') textClass += " status-M";
                     else if (val === 'L') textClass += " status-L";
-                    html += `<td class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
+                    html += `<td id="${cellId}" class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
                   } else {
-                    html += `<td class="${bgClass}" contenteditable="true" onblur="App.updateAttendance(${idx}, ${day.d}, '${cfg.key}', this.innerText)">${val}</td>`;
+                    // Logic for Time/Paraf rows
+                    if (val === 'A') textClass += " status-A";
+                    else if (val === 'S') textClass += " status-S";
+                    else if (val === 'I') textClass += " status-I";
+
+                    // onclick = cycle status logic
+                    // REMOVED: contenteditable and onblur to disable typing
+                    html += `<td id="${cellId}" class="${bgClass} ${textClass} cell-input" 
+                             onclick="App.handleCellClick(${idx}, ${day.d}, '${cfg.key}', this)">${val}</td>`;
                   }
                 });
                 html += `</tr>`;
@@ -986,6 +996,7 @@ Admin Rina</textarea>
         resetData() {
             if(confirm("Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?")) {
                 localStorage.removeItem("absenProData");
+                localStorage.removeItem("absenProTheme"); // Clear theme too
                 location.reload();
             }
         }
