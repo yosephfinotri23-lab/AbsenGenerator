@@ -550,26 +550,74 @@
             <div
               style="
                 display: flex;
-                align-items: center;
-                gap: 8px;
+                flex-direction: column;
+                gap: 5px;
                 background: #fff;
                 padding: 10px;
                 border: 1px solid #cbd5e1;
                 border-radius: 8px;
               "
             >
-              <input
-                type="checkbox"
-                id="toggleShift"
-                style="width: auto; margin: 0; cursor: pointer;"
-                onchange="App.render()"
-                checked
-              />
-              <span
-                style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
-                onclick="document.getElementById('toggleShift').click()"
-                >Tampilkan Baris Shift</span
-              >
+              <!-- Shift Toggle -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input
+                  type="checkbox"
+                  id="toggleShift"
+                  style="width: auto; margin: 0; cursor: pointer;"
+                  onchange="App.render()"
+                  checked
+                />
+                <span
+                  style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                  onclick="document.getElementById('toggleShift').click()"
+                  >Tampilkan Baris Shift</span
+                >
+              </div>
+              <!-- Datang Toggle -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input
+                  type="checkbox"
+                  id="toggleDatang"
+                  style="width: auto; margin: 0; cursor: pointer;"
+                  onchange="App.render()"
+                  checked
+                />
+                <span
+                  style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                  onclick="document.getElementById('toggleDatang').click()"
+                  >Tampilkan Baris Datang</span
+                >
+              </div>
+              <!-- Pulang Toggle -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input
+                  type="checkbox"
+                  id="togglePulang"
+                  style="width: auto; margin: 0; cursor: pointer;"
+                  onchange="App.render()"
+                  checked
+                />
+                <span
+                  style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                  onclick="document.getElementById('togglePulang').click()"
+                  >Tampilkan Baris Pulang</span
+                >
+              </div>
+              <!-- Paraf Toggle -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input
+                  type="checkbox"
+                  id="toggleParaf"
+                  style="width: auto; margin: 0; cursor: pointer;"
+                  onchange="App.render()"
+                  checked
+                />
+                <span
+                  style="font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                  onclick="document.getElementById('toggleParaf').click()"
+                  >Tampilkan Baris Paraf</span
+                >
+              </div>
             </div>
           </div>
 
@@ -700,7 +748,7 @@
               id="listNama"
               style="height: 250px"
               placeholder="Tulis nama pegawai, format: [TimNama] Nama Pegawai"
-              readonly
+              onblur="App.render()"
             >[Tim 1] Dr. Budi Santoso
 [Tim 1] Suster Siti Aminah
 [Tim 2] Perawat Joko
@@ -900,7 +948,7 @@ Admin Rina</textarea>
             const dateObj = new Date(year, mIdx, d);
             const dayNum = dateObj.getDay();
             const isHol = manualHolidays.includes(d) || dayNum === 0 || (sabtuLibur && dayNum === 6);
-            let isToday = false; // nonaktif highlight today
+            let isToday = false; 
             days.push({ d, isHol, isToday });
           }
           return days;
@@ -926,6 +974,11 @@ Admin Rina</textarea>
           this.render();
         },
 
+        updateAttendance(idx, day, key, val) {
+            this.data.attendance[`${idx}-${day}-${key}`] = val;
+            this.saveState();
+        },
+
         render() {
           this.saveState();
 
@@ -938,6 +991,9 @@ Admin Rina</textarea>
 
           const modeTim = document.getElementById("modeTim").checked;
           const showShift = document.getElementById("toggleShift").checked;
+          const showDatang = document.getElementById("toggleDatang").checked;
+          const showPulang = document.getElementById("togglePulang").checked;
+          const showParaf = document.getElementById("toggleParaf").checked;
 
           // Parse tim dan nama
           this.timMap = {};
@@ -957,15 +1013,25 @@ Admin Rina</textarea>
           let groupedData = [];
           if (modeTim) {
             let mapTim = {};
+            let noTimList = [];
             names.forEach((name, i) => {
-              let t = this.timMap[i] || "__--NO-TIM--__";
-              if (!mapTim[t]) mapTim[t] = [];
-              mapTim[t].push({ idx: i, name });
+              let t = this.timMap[i];
+              if (!t) {
+                  noTimList.push({ idx: i, name });
+              } else {
+                  if (!mapTim[t]) mapTim[t] = [];
+                  mapTim[t].push({ idx: i, name });
+              }
             });
+            // Add teams first
             groupedData = Object.entries(mapTim).map(([tim, members]) => ({
-              tim: tim === "__--NO-TIM--__" ? null : tim,
+              tim: tim,
               members,
             }));
+            // Add individual employees at the end
+            if(noTimList.length > 0) {
+                groupedData.push({ tim: null, members: noTimList });
+            }
           } else {
             groupedData = [{ tim: null, members: names.map((name, i) => ({ idx: i, name })) }];
           }
@@ -994,25 +1060,20 @@ Admin Rina</textarea>
           });
           html += `</tr></thead><tbody>`;
 
+          // Generate config based on toggles
           let rowsConfig = [];
-          if (modeTim) {
-            if (showShift) rowsConfig = [{ lbl: "Shift", key: "shift" }];
-          } else {
-            rowsConfig = [
-              ...(showShift ? [{ lbl: "Shift", key: "shift" }] : []),
-              { lbl: "Datang", key: "in" },
-              { lbl: "Paraf", key: "sign_in" },
-              { lbl: "Pulang", key: "out" },
-              { lbl: "Paraf", key: "sign_out" },
-            ];
-          }
+          if (showShift) rowsConfig.push({ lbl: "Shift", key: "shift" });
+          if (showDatang) rowsConfig.push({ lbl: "Datang", key: "in" });
+          if (showParaf) rowsConfig.push({ lbl: "Paraf", key: "sign_in" });
+          if (showPulang) rowsConfig.push({ lbl: "Pulang", key: "out" });
+          if (showParaf) rowsConfig.push({ lbl: "Paraf", key: "sign_out" });
 
           let anggotaNo = 1;
           groupedData.forEach((group) => {
             if (modeTim && group.tim !== null) {
-              // baris header shift tim
-              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px;">
-                Shift <span style="font-weight:bold;">(${group.tim})</span>
+              // baris header shift tim - SIMPLIFIED LABEL
+              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px; border-bottom:1px solid #000;">
+                <span style="font-weight:800; color:var(--primary);">${group.tim}</span>
               </td></tr>`;
             }
 
@@ -1029,29 +1090,23 @@ Admin Rina</textarea>
                 daysData.forEach((day) => {
                   const bgClass = day.isHol ? "st-libur" : "";
                   let val = "";
-
-                  if (modeTim && cfg.key === "shift") {
-                    const timName = this.timMap[idx];
-                    if (timName) {
-                      const firstIdx = Object.entries(this.timMap).find(([i, t]) => t === timName);
-                      if (firstIdx) {
-                        val = this.data.attendance[`${firstIdx[0]}-${day.d}-shift`] || "";
-                      }
-                    } else {
-                      val = this.data.attendance[`${idx}-${day.d}-shift`] || "";
-                    }
-                  } else if (!modeTim) {
-                    val = this.data.attendance[`${idx}-${day.d}-${cfg.key}`] || "";
-                  }
+                  
+                  // Ambil value dari storage
+                  val = this.data.attendance[`${idx}-${day.d}-${cfg.key}`] || "";
 
                   let clickAttr = "";
                   let textClass = "";
-                  if (cfg.key === "shift" && showShift) {
-                    clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${this.timMap[idx]}', ${day.d}, this)"`;
+                  
+                  // Logika Baris SHIFT (Bisa Cycle P, S, M, L)
+                  if (cfg.key === "shift") {
+                    clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${this.timMap[idx] || ''}', ${day.d}, this)"`;
                     textClass = "cell-input";
+                    if (["L", "M", "A", "S"].includes(val)) textClass += " text-danger";
+                    html += `<td class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
+                  } else {
+                    // Logika Baris INPUT MANUAL (Datang, Pulang, Paraf) - Editable
+                    html += `<td class="${bgClass}" contenteditable="true" onblur="App.updateAttendance(${idx}, ${day.d}, '${cfg.key}', this.innerText)">${val}</td>`;
                   }
-
-                  html += `<td class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
                 });
 
                 html += `</tr>`;
@@ -1065,6 +1120,30 @@ Admin Rina</textarea>
           document.getElementById("mainTable").innerHTML = html;
         },
 
+        getTTDHTML(year, mIdx, daysCount, colspan) {
+          const fields = ["ttd1_jabatan", "ttd1_nama", "ttd1_nip", "ttd2_jabatan", "ttd2_kota", "ttd2_nama", "ttd2_nip"];
+          const v = {};
+          fields.forEach((f) => (v[f] = document.getElementById(f).value || ".................."));
+
+          return `
+            <tr class="signature-row">
+                <td colspan="${colspan}">
+                    <div class="footer-ttd">
+                        <div class="ttd-block">
+                            <p>Mengetahui,<br>${v.ttd1_jabatan}</p>
+                            <div class="ttd-space"></div>
+                            <p><u><b>${v.ttd1_nama}</b></u><br>NIP. ${v.ttd1_nip}</p>
+                        </div>
+                        <div class="ttd-block">
+                            <p>${v.ttd2_kota}, ${daysCount} ${this.months[mIdx]} ${year}<br>${v.ttd2_jabatan}</p>
+                            <div class="ttd-space"></div>
+                            <p><u><b>${v.ttd2_nama}</b></u><br>NIP. ${v.ttd2_nip}</p>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        },
+
         cycleShiftTeam(idx, timName, day, el) {
           const cycles = ["", "P", "S", "M", "L"];
           let currVal = el.innerText;
@@ -1072,17 +1151,21 @@ Admin Rina</textarea>
           if (currIdx === -1) currIdx = 0;
           let nextVal = cycles[(currIdx + 1) % cycles.length];
 
-          if (timName) {
-            for (let [i, t] of Object.entries(App.timMap)) {
-              if (t === timName) {
-                App.data.attendance[`${i}-${day}-shift`] = nextVal;
-              }
-            }
+          const modeTim = document.getElementById("modeTim").checked;
+
+          if (modeTim && timName) {
+             // Mode TIM AKTIF: Update semua anggota tim yang sama
+             Object.entries(this.timMap).forEach(([k, v]) => {
+                 if (v === timName) {
+                     this.data.attendance[`${k}-${day}-shift`] = nextVal;
+                 }
+             });
           } else {
-            App.data.attendance[`${idx}-${day}-shift`] = nextVal;
+             // Mode INDIVIDU: Update diri sendiri saja
+             this.data.attendance[`${idx}-${day}-shift`] = nextVal;
           }
-          App.saveState();
-          App.render();
+          this.saveState();
+          this.render();
         },
 
         clearRow(idx) {
@@ -1095,157 +1178,134 @@ Admin Rina</textarea>
           }
         },
 
-        getTTDHTML(year, mIdx, daysCount, colspan) {
-          const fields = [
-            "ttd1_jabatan",
-            "ttd1_nama",
-            "ttd1_nip",
-            "ttd2_jabatan",
-            "ttd2_kota",
-            "ttd2_nama",
-            "ttd2_nip",
-          ];
-          const v = {};
-          fields.forEach((f) => (v[f] = document.getElementById(f).value || ".................."));
-          return `
-          <tr class="signature-row">
-            <td colspan="${colspan}">
-              <div class="footer-ttd">
-                <div class="ttd-block">
-                  <p>Mengetahui,<br>${v.ttd1_jabatan}</p>
-                  <div class="ttd-space"></div>
-                  <p><u><b>${v.ttd1_nama}</b></u><br>NIP. ${v.ttd1_nip}</p>
-                </div>
-                <div class="ttd-block">
-                  <p>${v.ttd2_kota}, ${daysCount} ${this.months[mIdx]} ${year}<br>${v.ttd2_jabatan}</p>
-                  <div class="ttd-space"></div>
-                  <p><u><b>${v.ttd2_nama}</b></u><br>NIP. ${v.ttd2_nip}</p>
-                </div>
-              </div>
-            </td>
-          </tr>`;
-        },
-
-        saveState() {
-          const state = {
-            attendance: this.data.attendance,
-            inputs: {
-              judulLaporan: document.getElementById("judulLaporan").value,
-              bulan: document.getElementById("bulan").value,
-              tahun: document.getElementById("tahun").value,
-              toggleShift: document.getElementById("toggleShift").checked,
-              modeTim: document.getElementById("modeTim").checked,
-              sabtuLibur: document.getElementById("sabtuLibur").checked,
-              libur: document.getElementById("libur").value,
-              listNama: document.getElementById("listNama").value,
-              headerColor: document.getElementById("headerColor").value,
-              logoUrl: document.getElementById("logoUrl").value,
-              ttd1_jabatan: document.getElementById("ttd1_jabatan").value,
-              ttd1_nama: document.getElementById("ttd1_nama").value,
-              ttd1_nip: document.getElementById("ttd1_nip").value,
-              ttd2_jabatan: document.getElementById("ttd2_jabatan").value,
-              ttd2_kota: document.getElementById("ttd2_kota").value,
-              ttd2_nama: document.getElementById("ttd2_nama").value,
-              ttd2_nip: document.getElementById("ttd2_nip").value,
-            },
-          };
-          localStorage.setItem("absenProData", JSON.stringify(state));
-        },
-
-        loadState() {
-          const saved = localStorage.getItem("absenProData");
-          if (saved) {
-            try {
-              const state = JSON.parse(saved);
-              this.data.attendance = state.attendance || {};
-              if (state.inputs) {
-                for (const [k, v] of Object.entries(state.inputs)) {
-                  const el = document.getElementById(k);
-                  if (el) {
-                    if (el.type === "checkbox") el.checked = v;
-                    else el.value = v;
-                  }
-                }
-                this.timMap = {}; // reset timMap, nanti akan diisi ulang di render
-                document.documentElement.style.setProperty("--table-header-bg", state.inputs.headerColor);
-              }
-            } catch (e) {
-              console.error("Load state error", e);
-            }
-          }
-        },
-
         showStats() {
-          const namesRaw = document.getElementById("listNama").value.split("\n").filter((n) => n.trim());
-          const modeTim = document.getElementById("modeTim").checked;
+          const names = document.getElementById("listNama").value.split("\n").filter((n) => n.trim());
           const daysData = this.getDaysArray();
-          const names = [];
-          const timMap = {};
-          namesRaw.forEach((line, idx) => {
-            let match = line.match(/^\s*\[(.+?)\]\s*(.+)$/);
-            if (match) {
-              timMap[idx] = match[1];
-              names.push(match[2]);
-            } else {
-              timMap[idx] = null;
-              names.push(line.trim());
-            }
-          });
+          
           let html = `<thead><tr><th>Nama Pegawai</th>`;
-          let cols = ["P", "S", "M", "L"];
+          const cols = ["P", "S", "M", "L"];
+
           cols.forEach((c) => (html += `<th>${c}</th>`));
           html += `<th>Total</th></tr></thead><tbody>`;
 
-          names.forEach((name, idx) => {
+          // Perlu re-parse nama bersih tanpa [Tim] untuk tampilan stats
+          names.forEach((rawName, idx) => {
+            let cleanName = rawName.replace(/^\s*\[.+?\]\s*/, "");
             let counts = {};
             cols.forEach((c) => (counts[c] = 0));
             let total = 0;
+
             daysData.forEach((day) => {
-              let keys = [];
-              if (modeTim) {
-                let t = timMap[idx];
-                if (t) {
-                  let firstIdx = Object.entries(timMap).find(([i, x]) => x === t);
-                  if (firstIdx) {
-                    keys.push(`${firstIdx[0]}-${day.d}-shift`);
-                  }
-                } else {
-                  keys.push(`${idx}-${day.d}-shift`);
-                }
-              } else {
-                keys.push(`${idx}-${day.d}-shift`);
+              let key = `${idx}-${day.d}-shift`;
+              let val = this.data.attendance[key];
+              if (val && counts[val] !== undefined) {
+                counts[val]++;
+                total++;
               }
-              keys.forEach((k) => {
-                let val = this.data.attendance[k];
-                if (val && counts[val] !== undefined) {
-                  counts[val]++;
-                  total++;
-                }
-              });
             });
-            html += `<tr><td style="text-align:left; font-weight:bold;">${name}</td>`;
+
+            html += `<tr><td style="text-align:left; font-weight:bold;">${cleanName}</td>`;
             cols.forEach((c) => (html += `<td>${counts[c]}</td>`));
             html += `<td>${total}</td></tr>`;
           });
+
           html += `</tbody>`;
           document.getElementById("statTableContent").innerHTML = html;
           document.getElementById("statsModal").style.display = "flex";
         },
 
         downloadExcel() {
-          const table = document.getElementById("mainTable");
-          const wb = XLSX.utils.table_to_book(table, { sheet: "Absensi" });
-          const bulan = document.getElementById("bulan").options[document.getElementById("bulan").selectedIndex].text;
-          const tahun = document.getElementById("tahun").value;
-          XLSX.writeFile(wb, `Absensi_${bulan}_${tahun}.xlsx`);
+            const table = document.getElementById("mainTable");
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Absensi" });
+            const bulan = document.getElementById("bulan").options[document.getElementById("bulan").selectedIndex].text;
+            const tahun = document.getElementById("tahun").value;
+            XLSX.writeFile(wb, `Absensi_${bulan}_${tahun}.xlsx`);
+        },
+
+        saveState() {
+            const state = {
+                attendance: this.data.attendance,
+                inputs: {
+                    judulLaporan: document.getElementById("judulLaporan").value,
+                    bulan: document.getElementById("bulan").value,
+                    tahun: document.getElementById("tahun").value,
+                    toggleShift: document.getElementById("toggleShift").checked,
+                    toggleDatang: document.getElementById("toggleDatang").checked,
+                    togglePulang: document.getElementById("togglePulang").checked,
+                    toggleParaf: document.getElementById("toggleParaf").checked,
+                    modeTim: document.getElementById("modeTim").checked,
+                    sabtuLibur: document.getElementById("sabtuLibur").checked,
+                    libur: document.getElementById("libur").value,
+                    listNama: document.getElementById("listNama").value,
+                    headerColor: document.getElementById("headerColor").value,
+                    logoUrl: document.getElementById("logoUrl").value,
+                    ttd1_jabatan: document.getElementById("ttd1_jabatan").value,
+                    ttd1_nama: document.getElementById("ttd1_nama").value,
+                    ttd1_nip: document.getElementById("ttd1_nip").value,
+                    ttd2_jabatan: document.getElementById("ttd2_jabatan").value,
+                    ttd2_kota: document.getElementById("ttd2_kota").value,
+                    ttd2_nama: document.getElementById("ttd2_nama").value,
+                    ttd2_nip: document.getElementById("ttd2_nip").value,
+                }
+            };
+            localStorage.setItem("absenProData", JSON.stringify(state));
+        },
+
+        loadState() {
+            const saved = localStorage.getItem("absenProData");
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    this.data.attendance = state.attendance || {};
+                    if(state.inputs) {
+                        for (const [key, val] of Object.entries(state.inputs)) {
+                            const el = document.getElementById(key);
+                            if(el) {
+                                if(el.type === 'checkbox') el.checked = val;
+                                else el.value = val;
+                            }
+                        }
+                        document.documentElement.style.setProperty("--table-header-bg", state.inputs.headerColor);
+                    }
+                } catch(e) { console.error("Error loading state", e); }
+            }
+        },
+
+        backupData() {
+            const saved = localStorage.getItem("absenProData");
+            if(!saved) return alert("Belum ada data tersimpan.");
+            
+            const blob = new Blob([saved], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `backup_absen_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        },
+
+        restoreData(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        JSON.parse(e.target.result); 
+                        localStorage.setItem("absenProData", e.target.result);
+                        location.reload(); 
+                    } catch(err) {
+                        alert("File backup tidak valid!");
+                    }
+                };
+                reader.readAsText(input.files[0]);
+            }
         },
 
         resetData() {
-          if (confirm("Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?")) {
-            localStorage.removeItem("absenProData");
-            location.reload();
-          }
-        },
+            if(confirm("Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?")) {
+                localStorage.removeItem("absenProData");
+                location.reload();
+            }
+        }
       };
 
       window.onload = () => App.init();
