@@ -4,3 +4,24 @@ body {
 .title {
   color: #5c6ac4;
 }
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+@media print {
+  .header-text h1 {
+    font-size: 12pt;
+  }
+  .header-text h3 {
+    font-size: 8pt;
+  }
+  .logo-img {
+    height: 50px;
+    width: 50px;
+  }
+  @page {
+    size: 330mm 210mm;
+    margin: 2mm;
+  }
+}
