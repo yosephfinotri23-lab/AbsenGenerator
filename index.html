@@ -12,8 +12,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
     <style>
       :root {
         /* -- Light Theme Variables -- */
@@ -64,30 +63,25 @@
         overflow: hidden;
         transition: background-color 0.3s, color 0.3s;
       }
-
+      
       /* --- Sidebar Styling --- */
       .sidebar {
-        width: 380px; /* Sedikit diperlebar untuk ikon + konten */
+        width: 360px;
         background: var(--bg-panel);
         border-right: 1px solid var(--border);
         display: flex;
         flex-direction: column;
-        z-index: 50;
+        z-index: 20;
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03);
         flex-shrink: 0;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-          background-color 0.3s;
+        transition: background-color 0.3s, border-color 0.3s;
       }
-
-      /* Brand Header */
       .brand {
-        padding: 15px 20px;
+        padding: 20px 20px;
         border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        height: 70px;
-        flex-shrink: 0;
+        justify-content: space-between; /* Memisahkan judul dan toggle */
       }
       .brand-left {
         display: flex;
@@ -96,7 +90,7 @@
       }
       .brand-icon {
         background: #e0e7ff;
-        color: #4f46e5;
+        color: #4f46e5; /* Keep icon color consistent or adjust if needed */
         width: 40px;
         height: 40px;
         border-radius: 10px;
@@ -148,1160 +142,376 @@
         transform: rotate(15deg);
       }
 
-      /* --- New Sidebar Body Layout --- */
-      .sidebar-body {
+      .tabs {
         display: flex;
-        flex: 1;
-        overflow: hidden;
-      }
-
-      /* Vertical Icon Menu */
-      .vertical-menu {
-        width: 64px;
         background: var(--bg-panel);
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 20px;
-        gap: 15px;
-        flex-shrink: 0;
+        padding: 10px 15px 0 15px;
+        gap: 5px;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        transition: background-color 0.3s;
       }
-
-      .menu-btn {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
+      
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
         border: none;
         background: transparent;
-        color: var(--secondary);
-        font-size: 1.1rem;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--secondary);
+        white-space: nowrap;
         position: relative;
       }
-
-      .menu-btn:hover {
-        background: var(--bg-body);
-        color: var(--primary);
-      }
-
-      .menu-btn.active {
-        background: var(--primary);
-        color: white;
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-      }
-
-      /* Tooltip text on hover (optional enhancement) */
-      .menu-btn::after {
-        content: attr(data-title);
+      
+      .tab-btn::after {
+        content: '';
         position: absolute;
-        left: 50px;
-        background: #334155;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-        z-index: 100;
-        visibility: hidden;
-      }
-      .menu-btn:hover::after {
-        opacity: 1;
-        visibility: visible;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background-color: var(--primary);
+        transition: width 0.2s ease-in-out;
+        border-radius: 3px 3px 0 0;
       }
 
-      /* Content Area inside Sidebar */
+      .tab-btn:hover {
+        color: var(--primary);
+        background: var(--bg-body);
+      }
+      .tab-btn:hover::after { width: 100%; }
+      .tab-btn.active { color: var(--primary); }
+      .tab-btn.active::after { width: 100%; }
+
       .sidebar-content {
         flex: 1;
         overflow-y: auto;
         padding: 20px;
-        /* Sembunyikan scrollbar */
-        scrollbar-width: none;
-        -ms-overflow-style: none;
       }
-      .sidebar-content::-webkit-scrollbar {
-        display: none;
-      }
+      .sidebar-content::-webkit-scrollbar { width: 6px; }
+      .sidebar-content::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 3px; }
 
       .tab-panel {
         display: none;
         animation: fadeIn 0.3s ease-out;
       }
-      .tab-panel.active {
-        display: block;
-      }
-
-      .panel-header {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-main);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--border);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .panel-header i {
-        color: var(--primary);
-      }
-
-      .form-group {
-        margin-bottom: 18px;
-      }
+      .tab-panel.active { display: block; }
+      
+      .form-group { margin-bottom: 18px; }
       .form-group label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        margin-bottom: 8px;
-        letter-spacing: 0.5px;
+        display: block; font-size: 0.75rem; font-weight: 700;
+        text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px;
       }
-
-      input[type="text"],
-      input[type="number"],
-      select,
-      textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--input-border);
-        border-radius: 8px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        background: var(--input-bg);
-        color: var(--text-main);
+      
+      input[type="text"], input[type="number"], select, textarea {
+        width: 100%; padding: 10px 12px; border: 1px solid var(--input-border);
+        border-radius: 8px; font-size: 0.9rem; transition: all 0.2s;
+        background: var(--input-bg); color: var(--text-main);
       }
-      input:focus,
-      textarea:focus,
-      select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-        outline: none;
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); outline: none;
       }
-      textarea {
-        resize: vertical;
-        min-height: 100px;
-        font-family: monospace;
-        line-height: 1.4;
-      }
-
+      textarea { resize: vertical; min-height: 100px; font-family: monospace; line-height: 1.4; }
+      
       .card-options {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 12px;
+        background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
       }
-      .row-inputs {
-        display: flex;
-        gap: 10px;
-      }
-
+      .row-inputs { display: flex; gap: 10px; }
+      
       .btn {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        gap: 8px; transition: all 0.2s; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
-      .btn:active {
-        transform: translateY(1px);
-      }
-      .btn-primary {
-        background: var(--primary);
-        color: white;
-      }
-      .btn-primary:hover {
-        background: var(--primary-dark);
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
-      }
+      .btn:active { transform: translateY(1px); }
+      .btn-primary { background: var(--primary); color: white; }
+      .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
+      
+      .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); margin-top: 10px; }
+      .btn-outline:hover { background: var(--bg-body); border-color: var(--secondary); }
+      
+      .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+      .btn-danger:hover { background: #fecaca; }
+      body.dark-mode .btn-danger { background: #7f1d1d; color: #fecaca; border-color: #991b1b; }
+      
+      .btn-success { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; margin-top: 10px; }
+      .btn-success:hover { background: #a7f3d0; }
+      body.dark-mode .btn-success { background: #064e3b; color: #a7f3d0; border-color: #065f46; }
+      
+      .btn-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; margin-top: 10px; }
+      .btn-warning:hover { background: #fde68a; }
+      body.dark-mode .btn-warning { background: #78350f; color: #fde68a; border-color: #92400e; }
 
-      .btn-outline {
-        background: transparent;
-        border: 1px solid var(--border);
-        color: var(--text-main);
-        margin-top: 10px;
-      }
-      .btn-outline:hover {
-        background: var(--bg-body);
-        border-color: var(--secondary);
-      }
-
-      .btn-danger {
-        background: #fee2e2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-      }
-      .btn-danger:hover {
-        background: #fecaca;
-      }
-      body.dark-mode .btn-danger {
-        background: #7f1d1d;
-        color: #fecaca;
-        border-color: #991b1b;
-      }
-
-      .btn-success {
-        background: #d1fae5;
-        color: #059669;
-        border: 1px solid #a7f3d0;
-        margin-top: 10px;
-      }
-      .btn-success:hover {
-        background: #a7f3d0;
-      }
-      body.dark-mode .btn-success {
-        background: #064e3b;
-        color: #a7f3d0;
-        border-color: #065f46;
-      }
-
-      .btn-warning {
-        background: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
-        margin-top: 10px;
-      }
-      .btn-warning:hover {
-        background: #fde68a;
-      }
-      body.dark-mode .btn-warning {
-        background: #78350f;
-        color: #fde68a;
-        border-color: #92400e;
-      }
-
-      .btn-small {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-        width: auto;
-        display: inline-flex;
-      }
+      .btn-small { padding: 6px 12px; font-size: 0.8rem; width: auto; display: inline-flex; }
 
       .main-area {
-        flex: 1;
-        overflow: auto;
-        padding: 40px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        position: relative;
-        background-color: var(--bg-body);
+        flex: 1; overflow: auto; padding: 40px; display: flex;
+        justify-content: center; align-items: flex-start;
+        position: relative; background-color: var(--bg-body);
         transition: background-color 0.3s;
       }
-
+      
       /* Kertas selalu putih agar terlihat seperti kertas asli */
       .paper {
-        background: white;
-        width: var(--paper-width);
-        min-width: var(--paper-width);
-        min-height: 210mm;
-        padding: 15mm 10mm;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        border-radius: 2px;
-        position: relative;
+        background: white; width: var(--paper-width); min-width: var(--paper-width); min-height: 210mm;
+        padding: 15mm 10mm; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); border-radius: 2px; position: relative;
         color: #000000; /* Text kertas selalu hitam */
       }
       body.dark-mode .paper {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Shadow lebih gelap di dark mode */
       }
-
+      
       .header-section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        border-bottom: 3px double #000;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
+        display: flex; align-items: center; justify-content: center; gap: 20px;
+        border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px;
       }
-      .logo-img {
-        height: 80px;
-        width: 80px;
-        object-fit: contain;
+      .logo-img { height: 80px; width: 80px; object-fit: contain; }
+      .header-text { text-align: center; color: #000; }
+      .header-text h1 { margin: 0; font-size: 18pt; text-transform: uppercase; letter-spacing: 1px; }
+      .header-text h3 { margin: 5px 0 0 0; font-size: 12pt; font-weight: normal; text-transform: uppercase; }
+      
+      table { width: 100%; border-collapse: collapse; font-size: 9pt; border: 2px solid #000; table-layout: fixed; }
+      th, td {
+        border: 1px solid #000; padding: 4px 2px; text-align: center;
+        vertical-align: middle; color: #000; background-color: transparent;
       }
-      .header-text {
-        text-align: center;
-        color: #000;
-      }
-      .header-text h1 {
-        margin: 0;
-        font-size: 18pt;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      .header-text h3 {
-        margin: 5px 0 0 0;
-        font-size: 12pt;
-        font-weight: normal;
-        text-transform: uppercase;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 9pt;
-        border: 2px solid #000;
-        table-layout: fixed;
-      }
-      th,
-      td {
-        border: 1px solid #000;
-        padding: 4px 2px;
-        text-align: center;
-        vertical-align: middle;
-        color: #000;
-        background-color: transparent;
-      }
-      thead th {
-        background-color: var(--table-header-bg, transparent);
-        height: 35px;
-        font-weight: bold;
-      }
-      .col-no {
-        width: 30px;
-      }
+      thead th { background-color: var(--table-header-bg, transparent); height: 35px; font-weight: bold; }
+      .col-no { width: 30px; }
       .col-nama {
-        width: 220px;
-        text-align: left;
-        padding-left: 8px;
-        font-weight: 700;
-        text-transform: uppercase;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-right: 2px solid #000;
-        cursor: pointer;
+        width: 220px; text-align: left; padding-left: 8px; font-weight: 700;
+        text-transform: uppercase; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; border-right: 2px solid #000; cursor: pointer;
       }
-      .col-nama:hover {
-        background-color: #f1f5f9;
-        color: var(--primary);
-        text-decoration: underline;
-      }
+      .col-nama:hover { background-color: #f1f5f9; color: var(--primary); text-decoration: underline; }
       .col-ket {
-        width: 60px;
-        font-size: 8pt;
-        font-style: italic;
-        background: #fafafa;
-        border-right: 2px solid #000;
-        text-align: right;
-        padding-right: 5px;
+        width: 60px; font-size: 8pt; font-style: italic; background: #fafafa;
+        border-right: 2px solid #000; text-align: right; padding-right: 5px;
       }
-
+      
       /* Input cells clickable */
       .cell-input {
-        cursor: pointer;
+        cursor: pointer; 
         font-family: "Courier New", monospace;
-        font-weight: bold;
-        font-size: 10pt;
+        font-weight: bold; font-size: 10pt; 
         transition: background 0.1s;
         user-select: none; /* Mencegah seleksi teks saat klik cepat */
       }
-      .cell-input:hover {
-        background-color: #e0e7ff !important;
-      }
-
+      .cell-input:hover { background-color: #e0e7ff !important; }
+      
       /* Status Colors - Tetap sama di light/dark mode karena kertas putih */
-      .status-P {
-        color: #000000 !important;
-        font-weight: bold;
-      }
-      .status-S {
-        color: #b45309 !important;
-        font-weight: bold;
-      } /* Sakit - Orange */
-      .status-M {
-        color: #16a34a !important;
-        font-weight: bold;
-      }
-      .status-L {
-        color: #dc2626 !important;
-        font-weight: bold;
-      }
-      .status-A {
-        color: #dc2626 !important;
-        font-weight: bold;
-      } /* Alpa - Merah */
-      .status-I {
-        color: #000000 !important;
-        font-weight: bold;
-      } /* Izin - Hitam */
-      .status-C {
-        color: #2563eb !important;
-        font-weight: bold;
-      } /* Cuti - Biru */
-      .status-TL {
-        color: #9333ea !important;
-        font-weight: bold;
-      } /* Tugas Luar - Ungu */
-
-      .st-libur {
-        background-color: #fee2e2 !important;
-        color: #991b1b;
-      }
-
-      .signature-row td {
-        border: none !important;
-        padding-top: 30px;
-        background-color: white !important;
-      }
-      .footer-ttd {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding: 0 20px;
-      }
-      .ttd-block {
-        text-align: left;
-        min-width: 220px;
-      }
-      .ttd-space {
-        height: 80px;
-      }
-      .ttd-block p {
-        margin: 5px 0;
-      }
+      .status-P { color: #000000 !important; font-weight: bold; }
+      .status-S { color: #b45309 !important; font-weight: bold; }
+      .status-M { color: #16a34a !important; font-weight: bold; }
+      .status-L { color: #dc2626 !important; font-weight: bold; }
+      .status-A { color: #dc2626 !important; font-weight: bold; } /* Alpa - Merah */
+      .status-I { color: #000000 !important; font-weight: bold; } /* Izin - Hitam */
+      .st-libur { background-color: #fee2e2 !important; color: #991b1b; }
+      
+      .signature-row td { border: none !important; padding-top: 30px; background-color: white !important; }
+      .footer-ttd { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; }
+      .ttd-block { text-align: left; min-width: 220px; }
+      .ttd-space { height: 80px; }
+      .ttd-block p { margin: 5px 0; }
 
       .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(4px);
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 100;
+        display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
       }
       .modal-box {
-        background: var(--bg-panel);
-        color: var(--text-main);
-        width: 800px;
-        max-height: 80vh;
-        border-radius: 12px;
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        background: var(--bg-panel); color: var(--text-main);
+        width: 600px; max-height: 80vh; border-radius: 12px;
+        padding: 24px; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
       }
       .modal-header {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: space-between;
-        color: var(--primary);
+        font-size: 1.25rem; font-weight: bold; margin-bottom: 20px;
+        display: flex; justify-content: space-between; color: var(--primary);
       }
-      .modal-content {
-        overflow-y: auto;
-        flex: 1;
-      }
-      .stat-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-        border: none;
-      }
-      .stat-table th,
-      .stat-table td {
-        border: 1px solid var(--border);
-        padding: 10px;
-        text-align: center;
-      }
-      .stat-table th {
-        background: var(--bg-body);
-        text-align: left;
-        font-weight: 600;
-      }
-      .close-btn {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: var(--secondary);
-      }
-
-      /* Styles for Stats Switcher */
-      .stats-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 10px;
-      }
-      .stats-tab-btn {
-        background: transparent;
-        border: none;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-weight: 600;
-        color: var(--secondary);
-        border-radius: 6px;
-        transition: all 0.2s;
-      }
-      .stats-tab-btn.active {
-        background: var(--primary);
-        color: white;
-      }
-      .stats-tab-btn:hover:not(.active) {
-        background: var(--bg-body);
-        color: var(--primary);
-      }
-
-      /* --- Mobile Hamburger & Sidebar Responsiveness --- */
-      .mobile-nav-toggle {
-        display: none;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 60;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        font-size: 1.2rem;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 40;
-        backdrop-filter: blur(2px);
-      }
+      .modal-content { overflow-y: auto; flex: 1; }
+      .stat-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; border: none; }
+      .stat-table th, .stat-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+      .stat-table th { background: var(--bg-body); text-align: left; font-weight: 600; }
+      .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
 
       @media (max-width: 1024px) {
-        body {
-          flex-direction: row; /* Keep row for overlay effect */
-          height: 100vh; /* Restore height constraint */
-          overflow: hidden;
-        }
-        .sidebar {
-          position: fixed;
-          left: -380px; /* Hide off-canvas */
-          top: 0;
-          bottom: 0;
-          height: 100vh;
-          border-right: 1px solid var(--border);
-        }
-        .sidebar.open {
-          left: 0;
-          transform: translateX(0);
-        }
-        .mobile-nav-toggle {
-          display: flex;
-        }
-        .sidebar-overlay.active {
-          display: block;
-        }
-
-        /* Push content or just overlay it? Overlay is better for menu feel */
-        .main-area {
-          width: 100%;
-          padding: 80px 10px 20px 10px; /* Add top padding for hamburger */
-          overflow: auto;
-        }
-        .paper {
-          margin: 0 auto;
-          margin-bottom: 20px;
-          transform: scale(0.65);
-          transform-origin: top center;
-        }
+        body { flex-direction: column; height: auto; overflow-y: auto; }
+        .sidebar { width: 100%; height: auto; max-height: none; border-right: none; border-bottom: 1px solid var(--border); overflow-y: visible; }
+        .main-area { padding: 20px 10px; display: block; width: 100%; overflow: auto; }
+        .paper { margin: 0 auto; margin-bottom: 20px; transform: scale(0.8); transform-origin: top center; }
       }
-
       @media (max-width: 600px) {
-        .brand {
-          padding: 10px;
-        }
-        .paper {
-          transform: scale(0.45);
-          width: 297mm;
-        }
-        .header-text h1 {
-          font-size: 14pt;
-        }
-        .header-text h3 {
-          font-size: 10pt;
-        }
+        .brand { padding: 15px; } .main-area { padding: 10px; }
+        .paper { transform: scale(0.5); width: 297mm; }
+        .header-text h1 { font-size: 14pt; } .header-text h3 { font-size: 10pt; }
       }
-
+      
       @media print {
-        body {
-          background: white;
-          height: auto;
-          overflow: visible;
-          display: block;
-        }
-        .sidebar,
-        .modal-overlay,
-        .mobile-nav-toggle,
-        .sidebar-overlay {
-          display: none !important;
-        }
-        .main-area {
-          padding: 0;
-          margin: 0;
-          display: block;
-          overflow: visible;
-          width: 100%;
-          height: auto;
-        }
-        .paper {
-          box-shadow: none;
-          margin: 0;
-          width: 100% !important;
-          padding: 0;
-          border: none;
-          transform: none !important;
-        }
-        table {
-          font-size: 8pt;
-        }
-        th,
-        td {
-          padding: 1px 2px !important;
-          height: auto !important;
-        }
-        thead th {
-          height: 25px !important;
-        }
-        .header-section {
-          margin-bottom: 10px;
-          padding-bottom: 5px;
-        }
-        .header-text h1 {
-          margin: 0;
-          font-size: 14pt;
-        }
-        .header-text h3 {
-          margin: 0;
-          font-size: 10pt;
-        }
-        .signature-row td {
-          padding-top: 10px !important;
-        }
-        .ttd-space {
-          height: 50px !important;
-        }
-        .ttd-block p {
-          margin: 2px 0 !important;
-          line-height: 1.2;
-        }
-        tr {
-          page-break-inside: avoid;
-        }
-        .keep-with-footer {
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-          display: table-row-group;
-        }
-        .footer-ttd {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-        @page {
-          size: landscape;
-          margin: 5mm;
-        }
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
+        body { background: white; height: auto; overflow: visible; display: block; }
+        .sidebar, .modal-overlay { display: none !important; }
+        .main-area { padding: 0; margin: 0; display: block; overflow: visible; width: 100%; height: auto; }
+        .paper { box-shadow: none; margin: 0; width: 100% !important; padding: 0; border: none; transform: none !important; }
+        table { font-size: 8pt; } th, td { padding: 1px 2px !important; height: auto !important; }
+        thead th { height: 25px !important; }
+        .header-section { margin-bottom: 10px; padding-bottom: 5px; }
+        .header-text h1 { margin: 0; font-size: 14pt; } .header-text h3 { margin: 0; font-size: 10pt; }
+        .signature-row td { padding-top: 10px !important; } .ttd-space { height: 50px !important; }
+        .ttd-block p { margin: 2px 0 !important; line-height: 1.2; }
+        tr { page-break-inside: avoid; }
+        .keep-with-footer { page-break-inside: avoid !important; break-inside: avoid !important; display: table-row-group; }
+        .footer-ttd { page-break-inside: avoid; break-inside: avoid; }
+        @page { size: landscape; margin: 5mm; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(5px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
   </head>
   <body>
-    <!-- Mobile Elements -->
-    <button class="mobile-nav-toggle" onclick="App.toggleSidebar()">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    <div
-      id="mobileOverlay"
-      class="sidebar-overlay"
-      onclick="App.toggleSidebar()"
-    ></div>
-
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
       <div class="brand">
         <div class="brand-left">
-          <div class="brand-icon">
-            <i class="fa-solid fa-calendar-days"></i>
-          </div>
+          <div class="brand-icon"><i class="fa-solid fa-calendar-days"></i></div>
           <div class="brand-text">
             <span class="brand-title">Absen Generator</span>
             <span class="brand-subtitle">RSUPP Betun</span>
           </div>
         </div>
         <!-- Tombol Toggle Dark Mode -->
-        <button
-          class="theme-toggle"
-          onclick="App.toggleTheme()"
-          title="Ubah Tema Gelap/Terang"
-        >
+        <button class="theme-toggle" onclick="App.toggleTheme()" title="Ubah Tema Gelap/Terang">
           <i class="fa-solid fa-moon" id="themeIcon"></i>
         </button>
       </div>
+      
+      <div class="tabs">
+        <button id="btn-tab-umum" class="tab-btn active" onclick="App.switchTab('tab-umum')">Umum</button>
+        <button id="btn-tab-setting" class="tab-btn" onclick="App.switchTab('tab-setting')">Setting</button>
+        <button id="btn-tab-pegawai" class="tab-btn" onclick="App.switchTab('tab-pegawai')">Pegawai</button>
+        <button id="btn-tab-ttd" class="tab-btn" onclick="App.switchTab('tab-ttd')">Tanda Tangan</button>
+      </div>
 
-      <div class="sidebar-body">
-        <!-- Vertical Icon Navigation -->
-        <div class="vertical-menu">
-          <button
-            id="btn-tab-umum"
-            class="menu-btn active"
-            onclick="App.switchTab('tab-umum')"
-            data-title="Umum"
-          >
-            <i class="fa-solid fa-house"></i>
-          </button>
-          <button
-            id="btn-tab-setting"
-            class="menu-btn"
-            onclick="App.switchTab('tab-setting')"
-            data-title="Setting"
-          >
-            <i class="fa-solid fa-gear"></i>
-          </button>
-          <button
-            id="btn-tab-pegawai"
-            class="menu-btn"
-            onclick="App.switchTab('tab-pegawai')"
-            data-title="Pegawai"
-          >
-            <i class="fa-solid fa-users"></i>
-          </button>
-          <button
-            id="btn-tab-ttd"
-            class="menu-btn"
-            onclick="App.switchTab('tab-ttd')"
-            data-title="Tanda Tangan"
-          >
-            <i class="fa-solid fa-signature"></i>
-          </button>
-          <button
-            id="btn-tab-data"
-            class="menu-btn"
-            onclick="App.switchTab('tab-data')"
-            data-title="Data"
-          >
-            <i class="fa-solid fa-database"></i>
-          </button>
+      <div class="sidebar-content">
+        <!-- TAB UMUM -->
+        <div id="tab-umum" class="tab-panel active">
+          <div class="form-group">
+            <label>Judul Laporan</label>
+            <input type="text" id="judulLaporan" value="DAFTAR HADIR PEGAWAI" oninput="App.render()" />
+          </div>
+          <div class="form-group">
+            <label>Periode Absensi</label>
+            <div class="row-inputs">
+              <select id="bulan" onchange="App.render()"></select>
+              <input type="number" id="tahun" style="width: 80px" onchange="App.render()" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Hari Libur</label>
+            <div class="card-options">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <input type="checkbox" id="sabtuLibur" style="width: auto" onchange="App.render()" />
+                <span style="font-size: 0.9rem; font-weight:600;">Sabtu Merah</span>
+              </div>
+              <input type="text" id="libur" placeholder="Tgl Merah Manual (Cth: 1, 17)" oninput="App.render()" />
+            </div>
+          </div>
+          <hr style="border-top: 1px dashed var(--border); margin: 24px 0" />
+          <button class="btn btn-warning" onclick="App.showStats()"><i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi</button>
+          <div class="row-inputs" style="margin-top: 10px">
+            <button class="btn btn-outline" onclick="App.backupData()"><i class="fa-solid fa-download"></i> Backup</button>
+            <button class="btn btn-outline" onclick="document.getElementById('fileRestore').click()"><i class="fa-solid fa-upload"></i> Restore</button>
+            <input type="file" id="fileRestore" accept=".json" style="display: none" onchange="App.restoreData(this)" />
+          </div>
+          <button class="btn btn-success" onclick="App.downloadExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          <button class="btn btn-primary" style="margin-top: 10px" onclick="window.print()"><i class="fa-solid fa-print"></i> PDF / Print</button>
+          <button class="btn btn-danger" style="margin-top: 20px" onclick="App.resetData()"><i class="fa-solid fa-trash"></i> Reset All</button>
         </div>
 
-        <!-- Sidebar Content Panels -->
-        <div class="sidebar-content">
-          <!-- TAB UMUM -->
-          <div id="tab-umum" class="tab-panel active">
-            <div class="panel-header">
-              <i class="fa-solid fa-house"></i> Pengaturan Umum
-            </div>
-            <div class="form-group">
-              <label>Judul Laporan</label>
-              <input
-                type="text"
-                id="judulLaporan"
-                value="DAFTAR HADIR PEGAWAI"
-                oninput="App.render()"
-              />
-            </div>
-            <div class="form-group">
-              <label>Periode Absensi</label>
-              <div class="row-inputs">
-                <select id="bulan" onchange="App.render()"></select>
-                <input
-                  type="number"
-                  id="tahun"
-                  style="width: 80px"
-                  onchange="App.render()"
-                />
+        <!-- TAB SETTING -->
+        <div id="tab-setting" class="tab-panel">
+          <div class="form-group">
+            <label>Opsi Tampilan Baris</label>
+            <div class="card-options">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <input type="checkbox" id="toggleShift" style="width: auto;" onchange="App.render()" checked />
+                <span style="font-size: 0.9rem;">Baris Shift</span>
               </div>
-            </div>
-            <div class="form-group">
-              <label>Hari Libur</label>
-              <div class="card-options">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 8px;
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    id="sabtuLibur"
-                    style="width: auto"
-                    onchange="App.render()"
-                  />
-                  <span style="font-size: 0.9rem; font-weight: 600"
-                    >Sabtu Merah</span
-                  >
-                </div>
-                <input
-                  type="text"
-                  id="libur"
-                  placeholder="Tgl Merah Manual (Cth: 1, 17)"
-                  oninput="App.render()"
-                />
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <input type="checkbox" id="toggleDatang" style="width: auto;" onchange="App.render()" checked />
+                <span style="font-size: 0.9rem;">Baris Jam Datang</span>
               </div>
-            </div>
-            <hr style="border-top: 1px dashed var(--border); margin: 24px 0" />
-            <button class="btn btn-warning" onclick="App.showStats()">
-              <i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi
-            </button>
-          </div>
-
-          <!-- TAB SETTING -->
-          <div id="tab-setting" class="tab-panel">
-            <div class="panel-header">
-              <i class="fa-solid fa-gear"></i> Konfigurasi Tabel
-            </div>
-            <div class="form-group">
-              <label>Opsi Tampilan Baris</label>
-              <div class="card-options">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 5px;
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    id="toggleShift"
-                    style="width: auto"
-                    onchange="App.render()"
-                    checked
-                  />
-                  <span style="font-size: 0.9rem">Baris Shift</span>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 5px;
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    id="toggleDatang"
-                    style="width: auto"
-                    onchange="App.render()"
-                    checked
-                  />
-                  <span style="font-size: 0.9rem">Baris Jam Datang</span>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 5px;
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    id="togglePulang"
-                    style="width: auto"
-                    onchange="App.render()"
-                    checked
-                  />
-                  <span style="font-size: 0.9rem">Baris Jam Pulang</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <input
-                    type="checkbox"
-                    id="toggleParaf"
-                    style="width: auto"
-                    onchange="App.render()"
-                    checked
-                  />
-                  <span style="font-size: 0.9rem">Baris Paraf</span>
-                </div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <input type="checkbox" id="togglePulang" style="width: auto;" onchange="App.render()" checked />
+                <span style="font-size: 0.9rem;">Baris Jam Pulang</span>
               </div>
-            </div>
-            <div class="form-group">
-              <label>Mode Daftar Hadir</label>
-              <div
-                class="card-options"
-                style="display: flex; align-items: center; gap: 8px"
-              >
-                <input
-                  type="checkbox"
-                  id="modeTim"
-                  style="width: auto; margin: 0"
-                  onchange="App.render()"
-                />
-                <span style="font-size: 0.9rem; font-weight: 600"
-                  >Aktifkan Mode Tim</span
-                >
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="toggleParaf" style="width: auto;" onchange="App.render()" checked />
+                <span style="font-size: 0.9rem;">Baris Paraf</span>
               </div>
-            </div>
-            <div class="form-group">
-              <label>Personalisasi Tampilan</label>
-              <div class="row-inputs">
-                <input
-                  type="color"
-                  id="headerColor"
-                  value="#ffffff"
-                  style="height: 42px; padding: 2px; cursor: pointer; flex: 1"
-                  oninput="App.updateColor()"
-                />
-                <button
-                  class="btn btn-outline btn-small"
-                  onclick="document.getElementById('logoFile').click()"
-                >
-                  Ganti Logo
-                </button>
-              </div>
-              <input
-                type="text"
-                id="logoUrl"
-                placeholder="Atau paste URL Logo..."
-                oninput="App.render()"
-                style="margin-top: 10px"
-              />
-              <input
-                type="file"
-                id="logoFile"
-                accept="image/*"
-                style="display: none"
-                onchange="App.handleLogoUpload(this)"
-              />
             </div>
           </div>
+          <div class="form-group">
+            <label>Mode Daftar Hadir</label>
+            <div class="card-options" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="modeTim" style="width: auto; margin:0;" onchange="App.render()" />
+              <span style="font-size: 0.9rem; font-weight: 600;">Aktifkan Mode Tim</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Personalisasi Tampilan</label>
+            <div class="row-inputs">
+              <input type="color" id="headerColor" value="#ffffff" style="height: 42px; padding: 2px; cursor: pointer; flex:1;" oninput="App.updateColor()" />
+              <button class="btn btn-outline btn-small" onclick="document.getElementById('logoFile').click()">Ganti Logo</button>
+            </div>
+            <input type="text" id="logoUrl" placeholder="Atau paste URL Logo..." oninput="App.render()" style="margin-top: 10px" />
+            <input type="file" id="logoFile" accept="image/*" style="display: none" onchange="App.handleLogoUpload(this)" />
+          </div>
+        </div>
 
-          <!-- TAB PEGAWAI -->
-          <div id="tab-pegawai" class="tab-panel">
-            <div class="panel-header">
-              <i class="fa-solid fa-users"></i> Data Pegawai
-            </div>
-            <div
-              class="form-group"
-              style="
-                background: rgba(99, 102, 241, 0.1);
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid var(--primary);
-              "
-            >
-              <label style="color: var(--primary)">Tambah Pegawai Baru</label>
-              <input type="text" id="newNama" placeholder="Nama Lengkap" />
-              <select id="newTim" style="margin-top: 8px">
-                <option value="">-- Pilih Tim (Opsional) --</option>
-                <option value="Tim 1">Tim 1</option>
-                <option value="Tim 2">Tim 2</option>
-                <option value="Tim 3">Tim 3</option>
-                <option value="Tim 4">Tim 4</option>
-                <option value="Tim 5">Tim 5</option>
-                <option value="Tim 6">Tim 6</option>
-                <option value="Tim 7">Tim 7</option>
-                <option value="Tim 8">Tim 8</option>
-                <option value="Tim 9">Tim 9</option>
-                <option value="Tim 10">Tim 10</option>
-              </select>
-              <button
-                class="btn btn-primary"
-                style="margin-top: 10px"
-                onclick="App.tambahPegawai()"
-              >
-                <i class="fa fa-plus"></i> Tambahkan
-              </button>
-            </div>
-            <div class="form-group">
-              <label>Edit Daftar Nama (Massal)</label>
-              <textarea
-                id="listNama"
-                style="height: 300px; font-size: 0.85rem"
-                placeholder="Format: [Tim] Nama"
-                onblur="App.render()"
-              >
-[Tim 1] Dr. Budi Santoso
+        <!-- TAB PEGAWAI -->
+        <div id="tab-pegawai" class="tab-panel">
+          <div class="form-group" style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+             <label style="color: var(--primary);">Tambah Pegawai Baru</label>
+             <input type="text" id="newNama" placeholder="Nama Lengkap" />
+             <select id="newTim" style="margin-top: 8px">
+               <option value="">-- Pilih Tim (Opsional) --</option>
+               <option value="Tim 1">Tim 1</option>
+               <option value="Tim 2">Tim 2</option>
+               <option value="Tim 3">Tim 3</option>
+               <option value="Tim 4">Tim 4</option>
+               <option value="Tim 5">Tim 5</option>
+               <option value="Tim 6">Tim 6</option>
+               <option value="Tim 7">Tim 7</option>
+               <option value="Tim 8">Tim 8</option>
+               <option value="Tim 9">Tim 9</option>
+               <option value="Tim 10">Tim 10</option>
+             </select>
+             <button class="btn btn-primary" style="margin-top: 10px" onclick="App.tambahPegawai()"><i class="fa fa-plus"></i> Tambahkan</button>
+          </div>
+          <div class="form-group">
+            <label>Edit Daftar Nama (Massal)</label>
+            <textarea id="listNama" style="height: 300px; font-size: 0.85rem;" placeholder="Format: [Tim] Nama" onblur="App.render()">[Tim 1] Dr. Budi Santoso
 [Tim 1] Suster Siti Aminah
 [Tim 2] Perawat Joko
-Admin Rina</textarea
-              >
-              <small
-                style="
-                  color: var(--text-muted);
-                  font-size: 0.75rem;
-                  display: block;
-                  margin-top: 5px;
-                "
-                >*Klik nama di tabel preview untuk menghapus baris
-                pegawai.</small
-              >
-            </div>
+Admin Rina</textarea>
+            <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 5px">*Klik nama di tabel preview untuk menghapus baris pegawai.</small>
           </div>
+        </div>
 
-          <!-- TAB TTD -->
-          <div id="tab-ttd" class="tab-panel">
-            <div class="panel-header">
-              <i class="fa-solid fa-signature"></i> Tanda Tangan
-            </div>
-            <div class="form-group">
-              <label>Kiri (Mengetahui)</label>
-              <input
-                type="text"
-                id="ttd1_jabatan"
-                placeholder="Jabatan (mis: Direktur)"
-                class="mb-1"
-                oninput="App.render()"
-              />
-              <input
-                type="text"
-                id="ttd1_nama"
-                placeholder="Nama Pejabat"
-                style="margin-top: 5px"
-                oninput="App.render()"
-              />
-              <input
-                type="text"
-                id="ttd1_nip"
-                placeholder="NIP"
-                style="margin-top: 5px"
-                oninput="App.render()"
-              />
-            </div>
-            <hr style="border-top: 1px dashed var(--border); margin: 15px 0" />
-            <div class="form-group">
-              <label>Kanan (Pembuat/Ka. Ruang)</label>
-              <input
-                type="text"
-                id="ttd2_jabatan"
-                placeholder="Jabatan"
-                oninput="App.render()"
-              />
-              <input
-                type="text"
-                id="ttd2_kota"
-                placeholder="Kota (mis: Jakarta)"
-                style="margin-top: 5px"
-                oninput="App.render()"
-              />
-              <input
-                type="text"
-                id="ttd2_nama"
-                placeholder="Nama Pegawai"
-                style="margin-top: 5px"
-                oninput="App.render()"
-              />
-              <input
-                type="text"
-                id="ttd2_nip"
-                placeholder="NIP"
-                style="margin-top: 5px"
-                oninput="App.render()"
-              />
-            </div>
+        <!-- TAB TTD -->
+        <div id="tab-ttd" class="tab-panel">
+          <div class="form-group">
+            <label>Kiri (Mengetahui)</label>
+            <input type="text" id="ttd1_jabatan" placeholder="Jabatan (mis: Direktur)" class="mb-1" oninput="App.render()" />
+            <input type="text" id="ttd1_nama" placeholder="Nama Pejabat" style="margin-top: 5px" oninput="App.render()" />
+            <input type="text" id="ttd1_nip" placeholder="NIP" style="margin-top: 5px" oninput="App.render()" />
           </div>
-
-          <!-- TAB DATA -->
-          <div id="tab-data" class="tab-panel">
-            <div class="panel-header">
-              <i class="fa-solid fa-database"></i> Manajemen Data
-            </div>
-            <div class="form-group">
-              <label>Kirim Data & Laporan</label>
-              <div class="card-options" style="text-align: center">
-                <p
-                  style="
-                    font-size: 0.85rem;
-                    color: var(--text-muted);
-                    margin-bottom: 10px;
-                    text-align: left;
-                  "
-                >
-                  <b>Langkah Pengiriman:</b><br />
-                  1. Klik tombol di bawah (File Backup .json akan terunduh
-                  otomatis).<br />
-                  2. Simpan halaman ini sebagai PDF (Print -> Save as PDF).<br />
-                  3. WhatsApp akan terbuka, lampirkan kedua file tersebut.
-                </p>
-                <button class="btn btn-success" onclick="App.sendReportWA()">
-                  <i class="fa-brands fa-whatsapp"></i> Kirim Laporan via WA
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Cetak Dokumen</label>
-              <button class="btn btn-primary" onclick="App.printPDF()">
-                <i class="fa-solid fa-print"></i> PDF / Print
-              </button>
-            </div>
-
-            <hr style="border-top: 1px dashed var(--border); margin: 20px 0" />
-
-            <div class="form-group">
-              <label>Backup & Restore</label>
-              <div class="card-options">
-                <button class="btn btn-outline" onclick="App.backupData()">
-                  <i class="fa-solid fa-download"></i> Backup Data (JSON)
-                </button>
-                <div style="margin-top: 10px; display: flex; gap: 5px">
-                  <button
-                    class="btn btn-outline"
-                    style="flex: 1"
-                    onclick="document.getElementById('fileRestore').click()"
-                  >
-                    <i class="fa-solid fa-upload"></i> Restore Data
-                  </button>
-                  <input
-                    type="file"
-                    id="fileRestore"
-                    accept=".json"
-                    style="display: none"
-                    onchange="App.restoreData(this)"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 20px">
-              <label style="color: var(--danger)">Zona Bahaya</label>
-              <button class="btn btn-danger" onclick="App.resetData()">
-                <i class="fa-solid fa-trash"></i> Reset Semua Data
-              </button>
-            </div>
+          <hr style="border-top: 1px dashed var(--border); margin: 15px 0" />
+          <div class="form-group">
+            <label>Kanan (Pembuat/Ka. Ruang)</label>
+            <input type="text" id="ttd2_jabatan" placeholder="Jabatan" oninput="App.render()" />
+            <input type="text" id="ttd2_kota" placeholder="Kota (mis: Jakarta)" style="margin-top: 5px" oninput="App.render()" />
+            <input type="text" id="ttd2_nama" placeholder="Nama Pegawai" style="margin-top: 5px" oninput="App.render()" />
+            <input type="text" id="ttd2_nip" placeholder="NIP" style="margin-top: 5px" oninput="App.render()" />
           </div>
         </div>
       </div>
@@ -1312,9 +522,7 @@ Admin Rina</textarea
         <div class="header-section">
           <img id="viewLogo" src="" class="logo-img" />
           <div class="header-text">
-            <h1 id="viewJudulInstansi">
-              RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN
-            </h1>
+            <h1 id="viewJudulInstansi">RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN</h1>
             <h3 id="viewSubJudul"></h3>
           </div>
         </div>
@@ -1326,61 +534,20 @@ Admin Rina</textarea
       <div class="modal-box">
         <div class="modal-header">
           <span>Rekapitulasi Absensi</span>
-          <button
-            class="close-btn"
-            onclick="document.getElementById('statsModal').style.display='none'"
-          >
-            &times;
-          </button>
+          <button class="close-btn" onclick="document.getElementById('statsModal').style.display='none'">&times;</button>
         </div>
         <div class="modal-content">
-          <div class="stats-tabs">
-            <button
-              id="btn-stat-status"
-              class="stats-tab-btn active"
-              onclick="App.switchStatsMode('status')"
-            >
-              Rekap Status (H/S/I/A...)
-            </button>
-            <button
-              id="btn-stat-shift"
-              class="stats-tab-btn"
-              onclick="App.switchStatsMode('shift')"
-            >
-              Rekap Shift (P/S/M/L)
-            </button>
-          </div>
           <table class="stat-table" id="statTableContent"></table>
         </div>
-        <button
-          class="btn btn-primary"
-          style="margin-top: 15px"
-          onclick="document.getElementById('statsModal').style.display='none'"
-        >
-          Tutup
-        </button>
+        <button class="btn btn-primary" style="margin-top: 15px" onclick="document.getElementById('statsModal').style.display='none'">Tutup</button>
       </div>
     </div>
 
     <script>
       const App = {
         data: { attendance: {} },
-        months: [
-          "JANUARI",
-          "FEBRUARI",
-          "MARET",
-          "APRIL",
-          "MEI",
-          "JUNI",
-          "JULI",
-          "AGUSTUS",
-          "SEPTEMBER",
-          "OKTOBER",
-          "NOVEMBER",
-          "DESEMBER",
-        ],
+        months: [ "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
         timMap: {},
-        currentStatsMode: "status",
 
         init() {
           const sel = document.getElementById("bulan");
@@ -1388,45 +555,28 @@ Admin Rina</textarea
           const now = new Date();
           sel.value = now.getMonth();
           document.getElementById("tahun").value = now.getFullYear();
-
+          
           // Load Theme Preference
-          const savedTheme = localStorage.getItem("absenProTheme");
-          if (savedTheme === "dark") {
-            document.body.classList.add("dark-mode");
-            document.getElementById("themeIcon").className = "fa-solid fa-sun";
+          const savedTheme = localStorage.getItem('absenProTheme');
+          if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeIcon').className = 'fa-solid fa-sun';
           }
 
           this.loadState();
           this.render();
         },
 
-        toggleSidebar() {
-          const sidebar = document.getElementById("sidebar");
-          const overlay = document.getElementById("mobileOverlay");
-          sidebar.classList.toggle("open");
-          overlay.classList.toggle("active");
-        },
-
         toggleTheme() {
-          document.body.classList.toggle("dark-mode");
-          const isDark = document.body.classList.contains("dark-mode");
-          localStorage.setItem("absenProTheme", isDark ? "dark" : "light");
-          document.getElementById("themeIcon").className = isDark
-            ? "fa-solid fa-sun"
-            : "fa-solid fa-moon";
+          document.body.classList.toggle('dark-mode');
+          const isDark = document.body.classList.contains('dark-mode');
+          localStorage.setItem('absenProTheme', isDark ? 'dark' : 'light');
+          document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         },
 
         switchTab(tabId) {
-          // Hide all panels
-          document
-            .querySelectorAll(".tab-panel")
-            .forEach((el) => el.classList.remove("active"));
-          // Deactivate all buttons
-          document
-            .querySelectorAll(".menu-btn")
-            .forEach((el) => el.classList.remove("active"));
-
-          // Activate specific
+          document.querySelectorAll(".tab-panel").forEach((el) => el.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((el) => el.classList.remove("active"));
           document.getElementById(tabId).classList.add("active");
           document.getElementById("btn-" + tabId).classList.add("active");
         },
@@ -1453,19 +603,14 @@ Admin Rina</textarea
           const year = parseInt(document.getElementById("tahun").value);
           const daysInMonth = new Date(year, mIdx + 1, 0).getDate();
           const liburVal = document.getElementById("libur").value || "";
-          const manualHolidays = liburVal
-            .split(",")
-            .map((n) => parseInt(n.trim()));
+          const manualHolidays = liburVal.split(",").map((n) => parseInt(n.trim()));
           const sabtuLibur = document.getElementById("sabtuLibur").checked;
 
           let days = [];
           for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, mIdx, d);
             const dayNum = dateObj.getDay();
-            const isHol =
-              manualHolidays.includes(d) ||
-              dayNum === 0 ||
-              (sabtuLibur && dayNum === 6);
+            const isHol = manualHolidays.includes(d) || dayNum === 0 || (sabtuLibur && dayNum === 6);
             days.push({ d, isHol });
           }
           return days;
@@ -1473,18 +618,11 @@ Admin Rina</textarea
 
         tambahPegawai() {
           const newNama = document.getElementById("newNama").value.trim();
-          if (!newNama) {
-            alert("Nama pegawai baru harus diisi!");
-            return;
-          }
+          if (!newNama) { alert("Nama pegawai baru harus diisi!"); return; }
           const newTim = document.getElementById("newTim").value.trim();
           let listNama = document.getElementById("listNama").value.trim();
           if (listNama) listNama += "\n";
-          if (newTim) {
-            listNama += `[${newTim}] ${newNama}`;
-          } else {
-            listNama += newNama;
-          }
+          if (newTim) { listNama += `[${newTim}] ${newNama}`; } else { listNama += newNama; }
           document.getElementById("listNama").value = listNama;
           document.getElementById("newNama").value = "";
           document.getElementById("newTim").value = "";
@@ -1493,85 +631,80 @@ Admin Rina</textarea
 
         // Helper: Cycle Status ONLY (No typing)
         handleCellClick(idx, day, key, el) {
-          const val = el.innerText.trim().toUpperCase();
-
-          // Cycle sequence: Empty -> A -> I -> S -> C -> TL -> Empty
-          const cycles = ["", "A", "I", "S", "C", "TL"];
-          let currIdx = cycles.indexOf(val);
-          // If unknown value, reset to first in cycle
-          if (currIdx === -1) currIdx = 0;
-
-          const nextVal = cycles[(currIdx + 1) % cycles.length];
-
-          // Update UI immediately (Optimistic UI)
-          el.innerText = nextVal;
-
-          // Update Data & Smart Status without full re-render
-          this.updateAttendance(idx, day, key, nextVal, false);
+            const val = el.innerText.trim().toUpperCase();
+            
+            // Cycle sequence: Empty -> A -> I -> S -> Empty
+            const cycles = ["", "A", "I", "S"];
+            let currIdx = cycles.indexOf(val);
+            // If unknown value, reset to first in cycle
+            if (currIdx === -1) currIdx = 0; 
+            
+            const nextVal = cycles[(currIdx + 1) % cycles.length];
+            
+            // Update UI immediately (Optimistic UI)
+            el.innerText = nextVal;
+            
+            // Update Data & Smart Status without full re-render
+            this.updateAttendance(idx, day, key, nextVal, false);
         },
 
         // Updated: skipRender=true by default to support click cycling without heavy refresh
         updateAttendance(idx, day, key, val, skipRender = true) {
-          val = val.toUpperCase();
-          this.data.attendance[`${idx}-${day}-${key}`] = val;
+            val = val.toUpperCase();
+            this.data.attendance[`${idx}-${day}-${key}`] = val;
 
-          // Smart Status Logic
-          const specialStatus = ["A", "S", "I", "C", "TL"];
-          const relevantKeys = ["in", "out", "sign_in", "sign_out"];
-
-          // If updating one of the relevant keys with a special status, update others
-          if (relevantKeys.includes(key) && specialStatus.includes(val)) {
-            relevantKeys.forEach((k) => {
-              this.data.attendance[`${idx}-${day}-${k}`] = val;
-              // Update DOM if we are skipping full render
-              if (!skipRender) {
-                const cellId = `cell-${idx}-${day}-${k}`;
-                const cell = document.getElementById(cellId);
-                if (cell) {
-                  cell.innerText = val;
-                  // Update classes
-                  cell.className = cell.className
-                    .replace(/status-[A-Z]+/g, "")
-                    .trim();
-                  cell.classList.add(`status-${val}`);
-                }
-              }
-            });
-          } else if (relevantKeys.includes(key) && val === "") {
-            // If clearing status, clear related fields too
-            relevantKeys.forEach((k) => {
-              const currentVal = this.data.attendance[`${idx}-${day}-${k}`];
-              if (specialStatus.includes(currentVal)) {
-                this.data.attendance[`${idx}-${day}-${k}`] = "";
-                if (!skipRender) {
-                  const cellId = `cell-${idx}-${day}-${k}`;
-                  const cell = document.getElementById(cellId);
-                  if (cell) {
-                    cell.innerText = "";
-                    cell.className = cell.className
-                      .replace(/status-[A-Z]+/g, "")
-                      .trim();
-                  }
-                }
-              }
-            });
-          }
-
-          // Also update current cell class if skipping render
-          if (!skipRender) {
-            const cellId = `cell-${idx}-${day}-${key}`;
-            const cell = document.getElementById(cellId);
-            if (cell) {
-              cell.className = cell.className
-                .replace(/status-[A-Z]+/g, "")
-                .trim();
-              if (specialStatus.includes(val))
-                cell.classList.add(`status-${val}`);
+            // Smart Status Logic
+            const specialStatus = ['A', 'S', 'I'];
+            const relevantKeys = ['in', 'out', 'sign_in', 'sign_out'];
+            
+            // If updating one of the relevant keys with a special status, update others
+            if (relevantKeys.includes(key) && specialStatus.includes(val)) {
+                relevantKeys.forEach(k => {
+                    this.data.attendance[`${idx}-${day}-${k}`] = val;
+                    // Update DOM if we are skipping full render
+                    if (!skipRender) {
+                        const cellId = `cell-${idx}-${day}-${k}`;
+                        const cell = document.getElementById(cellId);
+                        if(cell) {
+                            cell.innerText = val;
+                            // Update classes
+                            cell.className = cell.className.replace(/status-[A-Z]/g, '').trim(); 
+                            cell.classList.add(`status-${val}`);
+                        }
+                    }
+                });
+            } else if (relevantKeys.includes(key) && val === "") {
+                // If clearing status, clear related fields too? 
+                // Maybe better to only clear self, but consistency suggests clearing all for A/I/S logic.
+                // For now, let's just clear logic for consistency if previously it was A/I/S
+                relevantKeys.forEach(k => {
+                    const currentVal = this.data.attendance[`${idx}-${day}-${k}`];
+                    if (specialStatus.includes(currentVal)) {
+                         this.data.attendance[`${idx}-${day}-${k}`] = "";
+                         if (!skipRender) {
+                            const cellId = `cell-${idx}-${day}-${k}`;
+                            const cell = document.getElementById(cellId);
+                            if(cell) {
+                                cell.innerText = "";
+                                cell.className = cell.className.replace(/status-[A-Z]/g, '').trim();
+                            }
+                         }
+                    }
+                });
             }
-          }
 
-          this.saveState();
-          if (skipRender) this.render();
+            // Also update current cell class if skipping render
+            if (!skipRender) {
+                 const cellId = `cell-${idx}-${day}-${key}`;
+                 const cell = document.getElementById(cellId);
+                 if(cell) {
+                     cell.className = cell.className.replace(/status-[A-Z]/g, '').trim();
+                     if(specialStatus.includes(val)) cell.classList.add(`status-${val}`);
+                 }
+            }
+
+            this.saveState();
+            if (skipRender) this.render();
         },
 
         render() {
@@ -1580,10 +713,7 @@ Admin Rina</textarea
           const judulLaporan = document.getElementById("judulLaporan").value;
           const mIdx = parseInt(document.getElementById("bulan").value);
           const year = parseInt(document.getElementById("tahun").value);
-          const namesRaw = document
-            .getElementById("listNama")
-            .value.split("\n")
-            .filter((n) => n.trim());
+          const namesRaw = document.getElementById("listNama").value.split("\n").filter((n) => n.trim());
 
           const modeTim = document.getElementById("modeTim").checked;
           const showShift = document.getElementById("toggleShift").checked;
@@ -1595,13 +725,8 @@ Admin Rina</textarea
           let names = [];
           namesRaw.forEach((line, idx) => {
             let match = line.match(/^\s*\[(.+?)\]\s*(.+)$/);
-            if (match) {
-              this.timMap[idx] = match[1];
-              names.push(match[2]);
-            } else {
-              this.timMap[idx] = null;
-              names.push(line.trim());
-            }
+            if (match) { this.timMap[idx] = match[1]; names.push(match[2]); } 
+            else { this.timMap[idx] = null; names.push(line.trim()); }
           });
 
           let groupedData = [];
@@ -1610,39 +735,20 @@ Admin Rina</textarea
             let noTimList = [];
             names.forEach((name, i) => {
               let t = this.timMap[i];
-              if (!t) {
-                noTimList.push({ idx: i, name });
-              } else {
-                if (!mapTim[t]) mapTim[t] = [];
-                mapTim[t].push({ idx: i, name });
-              }
+              if (!t) { noTimList.push({ idx: i, name }); } 
+              else { if (!mapTim[t]) mapTim[t] = []; mapTim[t].push({ idx: i, name }); }
             });
-            groupedData = Object.entries(mapTim).map(([tim, members]) => ({
-              tim,
-              members,
-            }));
-            if (noTimList.length > 0) {
-              groupedData.push({ tim: null, members: noTimList });
-            }
+            groupedData = Object.entries(mapTim).map(([tim, members]) => ({ tim, members }));
+            if(noTimList.length > 0) { groupedData.push({ tim: null, members: noTimList }); }
           } else {
-            groupedData = [
-              {
-                tim: null,
-                members: names.map((name, i) => ({ idx: i, name })),
-              },
-            ];
+            groupedData = [{ tim: null, members: names.map((name, i) => ({ idx: i, name })) }];
           }
 
-          const logo =
-            document.getElementById("logoUrl").value ||
-            "https://cdn-icons-png.flaticon.com/512/9386/9386918.png";
+          const logo = document.getElementById("logoUrl").value || "https://cdn-icons-png.flaticon.com/512/9386/9386918.png";
           const daysData = this.getDaysArray();
 
-          document.getElementById("viewJudulInstansi").innerText =
-            "RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN";
-          document.getElementById(
-            "viewSubJudul"
-          ).innerText = `${judulLaporan} - BULAN ${this.months[mIdx]} ${year}`;
+          document.getElementById("viewJudulInstansi").innerText = "RUMAH SAKIT UMUM PENYANGGA PERBATASAN BETUN";
+          document.getElementById("viewSubJudul").innerText = `${judulLaporan} - BULAN ${this.months[mIdx]} ${year}`;
           document.getElementById("viewLogo").src = logo;
 
           let html = `<thead><tr>
@@ -1667,64 +773,50 @@ Admin Rina</textarea
           groupedData.forEach((group, gIdx) => {
             const isLastGroup = gIdx === groupedData.length - 1;
             if (isLastGroup) {
-              html += `</tbody><tbody class="keep-with-footer">`;
+               html += `</tbody><tbody class="keep-with-footer">`;
             }
 
             if (modeTim && group.tim !== null) {
-              html += `<tr><td colspan="${
-                2 + daysData.length
-              }" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px; border-bottom:1px solid #000; page-break-after: avoid;">
-                <span style="font-weight:800; color:var(--primary-dark);">${
-                  group.tim
-                }</span>
+              html += `<tr><td colspan="${2 + daysData.length}" style="font-weight:bold; background:#eef2ff; font-size:0.9rem; text-align:left; padding-left:8px; border-bottom:1px solid #000; page-break-after: avoid;">
+                <span style="font-weight:800; color:var(--primary-dark);">${group.tim}</span>
               </td></tr>`;
             }
 
             group.members.forEach(({ idx, name }, mIdx) => {
               html += `<tr>
-              <td rowspan="${
-                rowsConfig.length + 1
-              }" style="font-weight:bold; border-bottom:2px solid #000;">${anggotaNo++}</td>
-              <td colspan="${
-                daysData.length + 1
-              }" class="col-nama" title="Klik untuk hapus baris ini" onclick="App.clearRow(${idx})" style="border-bottom:none;">${name}</td>
+              <td rowspan="${rowsConfig.length + 1}" style="font-weight:bold; border-bottom:2px solid #000;">${anggotaNo++}</td>
+              <td colspan="${daysData.length + 1}" class="col-nama" title="Klik untuk hapus baris ini" onclick="App.clearRow(${idx})" style="border-bottom:none;">${name}</td>
             </tr>`;
 
               rowsConfig.forEach((cfg, rIdx) => {
-                let borderStyle =
-                  rIdx === rowsConfig.length - 1
-                    ? "border-bottom:2px solid #000;"
-                    : "";
+                let borderStyle = rIdx === rowsConfig.length - 1 ? "border-bottom:2px solid #000;" : "";
                 html += `<tr style="${borderStyle}"><td class="col-ket">${cfg.lbl}</td>`;
 
                 daysData.forEach((day) => {
                   const bgClass = day.isHol ? "st-libur" : "";
-                  let val =
-                    this.data.attendance[`${idx}-${day.d}-${cfg.key}`] || "";
+                  let val = this.data.attendance[`${idx}-${day.d}-${cfg.key}`] || "";
                   let clickAttr = "";
                   let textClass = "";
-
+                  
                   // ID for smart updates
                   const cellId = `cell-${idx}-${day.d}-${cfg.key}`;
 
                   if (cfg.key === "shift") {
-                    clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${
-                      this.timMap[idx] || ""
-                    }', ${day.d}, this)"`;
+                    clickAttr = `onclick="App.cycleShiftTeam(${idx}, '${this.timMap[idx] || ''}', ${day.d}, this)"`;
                     textClass = "cell-input";
-                    if (val === "P") textClass += " status-P";
-                    else if (val === "S") textClass += " status-S";
-                    else if (val === "M") textClass += " status-M";
-                    else if (val === "L") textClass += " status-L";
+                    if (val === 'P') textClass += " status-P";
+                    else if (val === 'S') textClass += " status-S";
+                    else if (val === 'M') textClass += " status-M";
+                    else if (val === 'L') textClass += " status-L";
                     html += `<td id="${cellId}" class="${bgClass} ${textClass}" ${clickAttr}>${val}</td>`;
                   } else {
                     // Logic for Time/Paraf rows
-                    if (val === "A") textClass += " status-A";
-                    else if (val === "S") textClass += " status-S";
-                    else if (val === "I") textClass += " status-I";
-                    else if (val === "C") textClass += " status-C";
-                    else if (val === "TL") textClass += " status-TL";
+                    if (val === 'A') textClass += " status-A";
+                    else if (val === 'S') textClass += " status-S";
+                    else if (val === 'I') textClass += " status-I";
 
+                    // onclick = cycle status logic
+                    // REMOVED: contenteditable and onblur to disable typing
                     html += `<td id="${cellId}" class="${bgClass} ${textClass} cell-input" 
                              onclick="App.handleCellClick(${idx}, ${day.d}, '${cfg.key}', this)">${val}</td>`;
                   }
@@ -1734,32 +826,16 @@ Admin Rina</textarea
             });
           });
 
-          html += this.getTTDHTML(
-            year,
-            mIdx,
-            daysData.length,
-            2 + daysData.length
-          );
+          html += this.getTTDHTML(year, mIdx, daysData.length, 2 + daysData.length);
           html += `</tbody>`;
 
           document.getElementById("mainTable").innerHTML = html;
         },
 
         getTTDHTML(year, mIdx, daysCount, colspan) {
-          const fields = [
-            "ttd1_jabatan",
-            "ttd1_nama",
-            "ttd1_nip",
-            "ttd2_jabatan",
-            "ttd2_kota",
-            "ttd2_nama",
-            "ttd2_nip",
-          ];
+          const fields = ["ttd1_jabatan", "ttd1_nama", "ttd1_nip", "ttd2_jabatan", "ttd2_kota", "ttd2_nama", "ttd2_nip"];
           const v = {};
-          fields.forEach(
-            (f) =>
-              (v[f] = document.getElementById(f).value || "..................")
-          );
+          fields.forEach((f) => (v[f] = document.getElementById(f).value || ".................."));
 
           return `
             <tr class="signature-row">
@@ -1789,24 +865,18 @@ Admin Rina</textarea
 
           const modeTim = document.getElementById("modeTim").checked;
           if (modeTim && timName) {
-            Object.entries(this.timMap).forEach(([k, v]) => {
-              if (v === timName) {
-                this.data.attendance[`${k}-${day}-shift`] = nextVal;
-              }
-            });
+             Object.entries(this.timMap).forEach(([k, v]) => {
+                 if (v === timName) { this.data.attendance[`${k}-${day}-shift`] = nextVal; }
+             });
           } else {
-            this.data.attendance[`${idx}-${day}-shift`] = nextVal;
+             this.data.attendance[`${idx}-${day}-shift`] = nextVal;
           }
           this.saveState();
           this.render();
         },
 
         clearRow(idx) {
-          if (
-            confirm(
-              `Hapus semua data absensi untuk baris pegawai ke-${idx + 1}?`
-            )
-          ) {
+          if (confirm(`Hapus semua data absensi untuk baris pegawai ke-${idx + 1}?`)) {
             const prefix = `${idx}-`;
             Object.keys(this.data.attendance).forEach((k) => {
               if (k.startsWith(prefix)) delete this.data.attendance[k];
@@ -1816,266 +886,120 @@ Admin Rina</textarea
         },
 
         showStats() {
-          this.renderStatsTable();
+          const names = document.getElementById("listNama").value.split("\n").filter((n) => n.trim());
+          const daysData = this.getDaysArray();
+          let html = `<thead><tr><th>Nama Pegawai</th>`;
+          const cols = ["P", "S", "M", "L"];
+          cols.forEach((c) => (html += `<th>${c}</th>`));
+          html += `<th>Total</th></tr></thead><tbody>`;
+
+          names.forEach((rawName, idx) => {
+            let cleanName = rawName.replace(/^\s*\[.+?\]\s*/, "");
+            let counts = {}; cols.forEach((c) => (counts[c] = 0)); let total = 0;
+            daysData.forEach((day) => {
+              let key = `${idx}-${day.d}-shift`;
+              let val = this.data.attendance[key];
+              if (val && counts[val] !== undefined) { counts[val]++; total++; }
+            });
+            html += `<tr><td style="text-align:left; font-weight:bold;">${cleanName}</td>`;
+            cols.forEach((c) => (html += `<td>${counts[c]}</td>`));
+            html += `<td>${total}</td></tr>`;
+          });
+          html += `</tbody>`;
+          document.getElementById("statTableContent").innerHTML = html;
           document.getElementById("statsModal").style.display = "flex";
         },
 
-        switchStatsMode(mode) {
-          this.currentStatsMode = mode;
-          document.getElementById("btn-stat-status").classList.remove("active");
-          document.getElementById("btn-stat-shift").classList.remove("active");
-          document.getElementById(`btn-stat-${mode}`).classList.add("active");
-          this.renderStatsTable();
-        },
-
-        renderStatsTable() {
-          const names = document
-            .getElementById("listNama")
-            .value.split("\n")
-            .filter((n) => n.trim());
-          const daysData = this.getDaysArray();
-          let html = "";
-
-          if (this.currentStatsMode === "status") {
-            html = `<thead><tr><th>Nama Pegawai</th><th>Hadir</th><th>Sakit</th><th>Izin</th><th>Alpa</th><th>Cuti</th><th>TL</th><th>Total</th></tr></thead><tbody>`;
-
-            const shiftCodes = ["P", "S", "M", "L"];
-            const specialStatus = ["S", "I", "A", "C", "TL"];
-
-            names.forEach((rawName, idx) => {
-              let cleanName = rawName.replace(/^\s*\[.+?\]\s*/, "");
-              let counts = { H: 0, S: 0, I: 0, A: 0, C: 0, TL: 0 };
-              let total = 0;
-
-              daysData.forEach((day) => {
-                const valStatus =
-                  this.data.attendance[`${idx}-${day.d}-in`] || "";
-                const valShift =
-                  this.data.attendance[`${idx}-${day.d}-shift`] || "";
-
-                if (specialStatus.includes(valStatus)) {
-                  counts[valStatus]++;
-                  total++;
-                } else if (shiftCodes.includes(valShift) || valStatus) {
-                  counts["H"]++;
-                  total++;
-                }
-              });
-
-              html += `<tr><td style="text-align:left; font-weight:bold;">${cleanName}</td>`;
-              html += `<td>${counts.H}</td>`;
-              html += `<td>${counts.S}</td>`;
-              html += `<td>${counts.I}</td>`;
-              html += `<td>${counts.A}</td>`;
-              html += `<td>${counts.C}</td>`;
-              html += `<td>${counts.TL}</td>`;
-              html += `<td>${total}</td></tr>`;
-            });
-          } else {
-            // Mode Shift
-            html = `<thead><tr><th>Nama Pegawai</th><th>Pagi (P)</th><th>Siang (S)</th><th>Malam (M)</th><th>Libur (L)</th></tr></thead><tbody>`;
-
-            names.forEach((rawName, idx) => {
-              let cleanName = rawName.replace(/^\s*\[.+?\]\s*/, "");
-              let counts = { P: 0, S: 0, M: 0, L: 0 };
-
-              daysData.forEach((day) => {
-                const valShift =
-                  this.data.attendance[`${idx}-${day.d}-shift`] || "";
-                if (["P", "S", "M", "L"].includes(valShift)) {
-                  counts[valShift]++;
-                }
-              });
-
-              html += `<tr><td style="text-align:left; font-weight:bold;">${cleanName}</td>`;
-              html += `<td>${counts.P}</td>`;
-              html += `<td>${counts.S}</td>`;
-              html += `<td>${counts.M}</td>`;
-              html += `<td>${counts.L}</td></tr>`;
-            });
-          }
-
-          html += `</tbody>`;
-          document.getElementById("statTableContent").innerHTML = html;
+        downloadExcel() {
+            const table = document.getElementById("mainTable");
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Absensi" });
+            const bulan = document.getElementById("bulan").options[document.getElementById("bulan").selectedIndex].text;
+            const tahun = document.getElementById("tahun").value;
+            XLSX.writeFile(wb, `Absensi_${bulan}_${tahun}.xlsx`);
         },
 
         saveState() {
-          const state = {
-            attendance: this.data.attendance,
-            inputs: {
-              judulLaporan: document.getElementById("judulLaporan").value,
-              bulan: document.getElementById("bulan").value,
-              tahun: document.getElementById("tahun").value,
-              toggleShift: document.getElementById("toggleShift").checked,
-              toggleDatang: document.getElementById("toggleDatang").checked,
-              togglePulang: document.getElementById("togglePulang").checked,
-              toggleParaf: document.getElementById("toggleParaf").checked,
-              modeTim: document.getElementById("modeTim").checked,
-              sabtuLibur: document.getElementById("sabtuLibur").checked,
-              libur: document.getElementById("libur").value,
-              listNama: document.getElementById("listNama").value,
-              headerColor: document.getElementById("headerColor").value,
-              logoUrl: document.getElementById("logoUrl").value,
-              ttd1_jabatan: document.getElementById("ttd1_jabatan").value,
-              ttd1_nama: document.getElementById("ttd1_nama").value,
-              ttd1_nip: document.getElementById("ttd1_nip").value,
-              ttd2_jabatan: document.getElementById("ttd2_jabatan").value,
-              ttd2_kota: document.getElementById("ttd2_kota").value,
-              ttd2_nama: document.getElementById("ttd2_nama").value,
-              ttd2_nip: document.getElementById("ttd2_nip").value,
-            },
-          };
-          localStorage.setItem("absenProData", JSON.stringify(state));
+            const state = {
+                attendance: this.data.attendance,
+                inputs: {
+                    judulLaporan: document.getElementById("judulLaporan").value,
+                    bulan: document.getElementById("bulan").value,
+                    tahun: document.getElementById("tahun").value,
+                    toggleShift: document.getElementById("toggleShift").checked,
+                    toggleDatang: document.getElementById("toggleDatang").checked,
+                    togglePulang: document.getElementById("togglePulang").checked,
+                    toggleParaf: document.getElementById("toggleParaf").checked,
+                    modeTim: document.getElementById("modeTim").checked,
+                    sabtuLibur: document.getElementById("sabtuLibur").checked,
+                    libur: document.getElementById("libur").value,
+                    listNama: document.getElementById("listNama").value,
+                    headerColor: document.getElementById("headerColor").value,
+                    logoUrl: document.getElementById("logoUrl").value,
+                    ttd1_jabatan: document.getElementById("ttd1_jabatan").value,
+                    ttd1_nama: document.getElementById("ttd1_nama").value,
+                    ttd1_nip: document.getElementById("ttd1_nip").value,
+                    ttd2_jabatan: document.getElementById("ttd2_jabatan").value,
+                    ttd2_kota: document.getElementById("ttd2_kota").value,
+                    ttd2_nama: document.getElementById("ttd2_nama").value,
+                    ttd2_nip: document.getElementById("ttd2_nip").value,
+                }
+            };
+            localStorage.setItem("absenProData", JSON.stringify(state));
         },
 
         loadState() {
-          const saved = localStorage.getItem("absenProData");
-          if (saved) {
-            try {
-              const state = JSON.parse(saved);
-              this.data.attendance = state.attendance || {};
-              if (state.inputs) {
-                for (const [key, val] of Object.entries(state.inputs)) {
-                  const el = document.getElementById(key);
-                  if (el) {
-                    if (el.type === "checkbox") el.checked = val;
-                    else el.value = val;
-                  }
-                }
-                document.documentElement.style.setProperty(
-                  "--table-header-bg",
-                  state.inputs.headerColor
-                );
-              }
-            } catch (e) {
-              console.error("Error loading state", e);
+            const saved = localStorage.getItem("absenProData");
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    this.data.attendance = state.attendance || {};
+                    if(state.inputs) {
+                        for (const [key, val] of Object.entries(state.inputs)) {
+                            const el = document.getElementById(key);
+                            if(el) {
+                                if(el.type === 'checkbox') el.checked = val;
+                                else el.value = val;
+                            }
+                        }
+                        document.documentElement.style.setProperty("--table-header-bg", state.inputs.headerColor);
+                    }
+                } catch(e) { console.error("Error loading state", e); }
             }
-          }
         },
 
         backupData() {
-          const saved = localStorage.getItem("absenProData");
-          if (!saved) return alert("Belum ada data tersimpan.");
-          const blob = new Blob([saved], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `backup_absen_${new Date()
-            .toISOString()
-            .slice(0, 10)}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
+            const saved = localStorage.getItem("absenProData");
+            if(!saved) return alert("Belum ada data tersimpan.");
+            const blob = new Blob([saved], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `backup_absen_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
         },
 
         restoreData(input) {
-          if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              try {
-                JSON.parse(e.target.result);
-                localStorage.setItem("absenProData", e.target.result);
-                location.reload();
-              } catch (err) {
-                alert("File backup tidak valid!");
-              }
-            };
-            reader.readAsText(input.files[0]);
-          }
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        JSON.parse(e.target.result); 
+                        localStorage.setItem("absenProData", e.target.result);
+                        location.reload(); 
+                    } catch(err) { alert("File backup tidak valid!"); }
+                };
+                reader.readAsText(input.files[0]);
+            }
         },
 
         resetData() {
-          if (
-            confirm(
-              "Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?"
-            )
-          ) {
-            localStorage.removeItem("absenProData");
-            localStorage.removeItem("absenProTheme"); // Clear theme too
-            location.reload();
-          }
-        },
-
-        printPDF() {
-          // Check if mobile
-          const isMobile =
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-              navigator.userAgent
-            );
-
-          if (isMobile) {
-            alert(
-              "PDF akan dihasilkan dan didownload. Pastikan browser Anda mengizinkan download."
-            );
-          }
-
-          const { jsPDF } = window.jspdf;
-          const paper = document.querySelector(".paper");
-
-          html2canvas(paper, {
-            scale: 2, // Higher scale for better quality
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#ffffff", // Ensure white background
-          })
-            .then((canvas) => {
-              const imgData = canvas.toDataURL("image/png");
-              const pdf = new jsPDF("p", "mm", "a4");
-
-              const imgWidth = 210; // A4 width in mm
-              const pageHeight = 295; // A4 height in mm
-              const imgHeight = (canvas.height * imgWidth) / canvas.width;
-              let heightLeft = imgHeight;
-
-              let position = 0;
-
-              pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-              heightLeft -= pageHeight;
-
-              while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-              }
-
-              pdf.save(
-                "absen-" + new Date().toISOString().split("T")[0] + ".pdf"
-              );
-            })
-            .catch((err) => {
-              console.error("Error generating PDF:", err);
-              alert("Terjadi kesalahan saat membuat PDF. Coba lagi.");
-            });
-        },
-
-        sendReportWA() {
-          // 1. Auto-download JSON Backup
-          this.backupData();
-
-          // 2. Alert Instructions for PDF
-          alert(
-            "File Backup (.json) telah diunduh otomatis.\n\nLANGKAH SELANJUTNYA:\n1. Klik tombol 'PDF / Print' lalu pilih 'Simpan sebagai PDF' untuk mendapatkan file PDF.\n2. WhatsApp akan terbuka setelah ini.\n3. Lampirkan kedua file tersebut (JSON dan PDF) pada chat WhatsApp."
-          );
-
-          // 3. Construct WhatsApp Message
-          const judul = document.getElementById("judulLaporan").value;
-          const bulanTxt = this.months[document.getElementById("bulan").value];
-          const tahun = document.getElementById("tahun").value;
-          const names = document
-            .getElementById("listNama")
-            .value.split("\n")
-            .filter((n) => n.trim());
-
-          let text = `*LAPORAN ABSENSI*\n`;
-          text += `Instansi: ${judul}\n`;
-          text += `Periode: ${bulanTxt} ${tahun}\n`;
-          text += `Total Pegawai: ${names.length}\n\n`;
-          text += `Terlampir file laporan (PDF) dan data backup (JSON) yang telah saya kerjakan.\n`;
-          text += `Mohon dicek. Terima kasih.`;
-
-          const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-          window.open(url, "_blank");
-        },
+            if(confirm("Apakah Anda yakin ingin mereset SEMUA data dan pengaturan?")) {
+                localStorage.removeItem("absenProData");
+                localStorage.removeItem("absenProTheme"); // Clear theme too
+                location.reload();
+            }
+        }
       };
 
       window.onload = () => App.init();
