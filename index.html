@@ -405,12 +405,16 @@
       .col-ket { width: 60px; font-size: 9pt; font-style: italic; background: #fafafa; border-right: 2px solid #000; text-align: right; padding-right: 5px; } /* Ket slightly larger */
       .cell-input { cursor: pointer; font-family: "Courier New", monospace; font-weight: bold; font-size: 11pt; transition: background 0.1s; user-select: none; } /* Font increased */
       .cell-input:hover { background-color: #e0e7ff !important; }
+      
+      /* Status Colors */
       .status-P { color: #000000 !important; font-weight: bold; }
       .status-S { color: #b45309 !important; font-weight: bold; }
       .status-M { color: #16a34a !important; font-weight: bold; }
       .status-L { color: #dc2626 !important; font-weight: bold; }
       .status-A { color: #dc2626 !important; font-weight: bold; }
       .status-I { color: #000000 !important; font-weight: bold; }
+      .status-C { color: #0284c7 !important; font-weight: bold; } /* Cuti - Biru */
+      .status-TL { color: #9333ea !important; font-weight: bold; } /* Tugas Luar - Ungu */
       .st-libur { background-color: #fee2e2 !important; color: #991b1b; }
       
       .signature-row td { border: none !important; padding-top: 30px; background-color: white !important; page-break-inside: avoid; } /* Smart TTD Break */
@@ -1100,8 +1104,8 @@ Admin Rina</textarea
         handleCellClick(idx, day, key, el) {
           const val = el.innerText.trim().toUpperCase();
 
-          // Cycle sequence: Empty -> A -> I -> S -> Empty
-          const cycles = ["", "A", "I", "S"];
+          // Cycle sequence: Empty -> A -> I -> S -> C -> TL -> Empty
+          const cycles = ["", "A", "I", "S", "C", "TL"];
           let currIdx = cycles.indexOf(val);
           // If unknown value, reset to first in cycle
           if (currIdx === -1) currIdx = 0;
@@ -1121,7 +1125,7 @@ Admin Rina</textarea
           this.data.attendance[`${idx}-${day}-${key}`] = val;
 
           // Smart Status Logic
-          const specialStatus = ["A", "S", "I"];
+          const specialStatus = ["A", "S", "I", "C", "TL"];
           const relevantKeys = ["in", "out", "sign_in", "sign_out"];
 
           // If updating one of the relevant keys with a special status, update others
@@ -1136,7 +1140,7 @@ Admin Rina</textarea
                   cell.innerText = val;
                   // Update classes
                   cell.className = cell.className
-                    .replace(/status-[A-Z]/g, "")
+                    .replace(/status-[A-Z]+/g, "")
                     .trim();
                   cell.classList.add(`status-${val}`);
                 }
@@ -1154,7 +1158,7 @@ Admin Rina</textarea
                   if (cell) {
                     cell.innerText = "";
                     cell.className = cell.className
-                      .replace(/status-[A-Z]/g, "")
+                      .replace(/status-[A-Z]+/g, "")
                       .trim();
                   }
                 }
@@ -1168,7 +1172,7 @@ Admin Rina</textarea
             const cell = document.getElementById(cellId);
             if (cell) {
               cell.className = cell.className
-                .replace(/status-[A-Z]/g, "")
+                .replace(/status-[A-Z]+/g, "")
                 .trim();
               if (specialStatus.includes(val))
                 cell.classList.add(`status-${val}`);
@@ -1349,6 +1353,8 @@ Admin Rina</textarea
                     if (val === "A") textClass += " status-A";
                     else if (val === "S") textClass += " status-S";
                     else if (val === "I") textClass += " status-I";
+                    else if (val === "C") textClass += " status-C";
+                    else if (val === "TL") textClass += " status-TL";
                     html += `<td id="${cellId}" class="${bgClass} ${textClass} cell-input" 
                              onclick="App.handleCellClick(${idx}, ${day.d}, '${cfg.key}', this)">${val}</td>`;
                   }
@@ -1450,7 +1456,7 @@ Admin Rina</textarea
              cols = ["P", "S", "M", "L"];
              document.getElementById('statsTitle').innerText = "Rekapitulasi Shift (P/S/M/L)";
           } else {
-             cols = ["H", "S", "I", "A"]; // Hadir, Sakit, Izin, Alpa
+             cols = ["H", "S", "I", "A", "C", "TL"]; // Hadir, Sakit, Izin, Alpa, Cuti, Tugas Luar
              document.getElementById('statsTitle').innerText = "Rekapitulasi Kehadiran";
           }
           
@@ -1474,13 +1480,15 @@ Admin Rina</textarea
               } else {
                   // Status check (Smart Logic)
                   let statusVal = "";
-                  // Cek apakah ada A/S/I di salah satu cell
+                  // Cek apakah ada A/S/I/C/TL di salah satu cell
                   let s1 = this.data.attendance[`${idx}-${day.d}-in`] || "";
                   let s2 = this.data.attendance[`${idx}-${day.d}-out`] || "";
                   
                   if(s1 === "A" || s2 === "A") statusVal = "A";
                   else if(s1 === "S" || s2 === "S") statusVal = "S";
                   else if(s1 === "I" || s2 === "I") statusVal = "I";
+                  else if(s1 === "C" || s2 === "C") statusVal = "C";
+                  else if(s1 === "TL" || s2 === "TL") statusVal = "TL";
                   else if(!day.isHol) statusVal = "H"; // Default hadir jika tidak libur
 
                   if(statusVal && counts[statusVal] !== undefined) {
